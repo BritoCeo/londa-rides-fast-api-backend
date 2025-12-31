@@ -2,10 +2,12 @@
 
 ## ⚠️ Action Required
 
-**The following index is currently missing and causing errors:**
+**The following indexes are currently missing and causing errors:**
 - `rides` collection: `status` (ASC) + `createdAt` (DESC)
+- `subscription_payments` collection: `driverId` (ASC) + `createdAt` (DESC)
+- `payments` collection: `userId` (ASC) + `createdAt` (DESC)
 
-**Quick Fix:** Click the [direct link](#3-rides-collection---pending-rides-query) in section 3 below to create it instantly, or use the Firebase CLI method.
+**Quick Fix:** Click the direct links in the sections below to create them instantly, or use the Firebase CLI method.
 
 ---
 
@@ -93,6 +95,54 @@ Click this direct link to create the index automatically:
 
 ---
 
+### 4. Subscription Payments Collection - Driver Payment History Query
+
+**Query:** Get payment history for a driver, ordered by creation date (descending)
+
+**Fields:**
+- `driverId` (Ascending)
+- `createdAt` (Descending)
+
+**Collection:** `subscription_payments`
+
+**Index Creation:**
+1. Go to Firebase Console → Firestore → Indexes
+2. Click "Create Index"
+3. Set:
+   - Collection ID: `subscription_payments`
+   - Fields:
+     - Field: `driverId`, Order: Ascending
+     - Field: `createdAt`, Order: Descending
+4. Click "Create"
+
+**Or use the direct link from the error message** (when it appears in logs)
+
+---
+
+### 5. Payments Collection - User Payment History Query
+
+**Query:** Get payment history for a user, ordered by creation date (descending)
+
+**Fields:**
+- `userId` (Ascending)
+- `createdAt` (Descending)
+
+**Collection:** `payments`
+
+**Index Creation:**
+1. Go to Firebase Console → Firestore → Indexes
+2. Click "Create Index"
+3. Set:
+   - Collection ID: `payments`
+   - Fields:
+     - Field: `userId`, Order: Ascending
+     - Field: `createdAt`, Order: Descending
+4. Click "Create"
+
+**Or use the direct link from the error message** (when it appears in logs)
+
+---
+
 ## Quick Index Creation
 
 ### Using Firebase Console
@@ -170,6 +220,8 @@ The query requires an index. You can create it here: https://...
 - [ ] `rides` - userId (ASC) + createdAt (DESC)
 - [ ] `rides` - driverId (ASC) + createdAt (DESC)
 - [ ] `rides` - status (ASC) + createdAt (DESC)
+- [ ] `subscription_payments` - driverId (ASC) + createdAt (DESC)
+- [ ] `payments` - userId (ASC) + createdAt (DESC)
 
 **Note:** Create these indexes in Firebase Console before using the corresponding endpoints.
 
