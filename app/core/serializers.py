@@ -10,8 +10,9 @@ from app.core.logging import logger
 
 # Import Firestore types for type checking
 try:
-    from google.cloud.firestore import GeoPoint
-except ImportError:
+    from firebase_admin import firestore
+    GeoPoint = firestore.GeoPoint
+except (ImportError, AttributeError):
     # GeoPoint might not be available in all environments
     GeoPoint = None
 
@@ -61,9 +62,51 @@ def _serialize_value(value: Any) -> Any:
     if value is None:
         return None
     
+    # Get type name once for all checks
+    type_name = type(value).__name__
+    
+    # Handle Firestore GeoPoint FIRST (before datetime, as it's more specific)
+    # Check by type name first (most reliable)
+    if type_name == 'GeoPoint':
+        # Convert GeoPoint to dict with latitude and longitude
+        try:
+            return {
+                "latitude": float(value.latitude),
+                "longitude": float(value.longitude)
+            }
+        except (AttributeError, ValueError, TypeError) as e:
+            logger.warning(f"Failed to convert GeoPoint: {str(e)}")
+            return str(value)
+    
+    # Check for GeoPoint instance (using isinstance if available)
+    if GeoPoint is not None and isinstance(value, GeoPoint):
+        # Convert GeoPoint to dict with latitude and longitude
+        try:
+            return {
+                "latitude": float(value.latitude),
+                "longitude": float(value.longitude)
+            }
+        except (AttributeError, ValueError, TypeError) as e:
+            logger.warning(f"Failed to convert GeoPoint: {str(e)}")
+            return str(value)
+    
+    # Check for GeoPoint-like objects (has latitude and longitude attributes)
+    # This handles cases where GeoPoint might be wrapped or have different type
+    if hasattr(value, 'latitude') and hasattr(value, 'longitude'):
+        try:
+            # Only convert if it looks like a GeoPoint (both are numeric)
+            lat = value.latitude
+            lon = value.longitude
+            if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+                return {
+                    "latitude": float(lat),
+                    "longitude": float(lon)
+                }
+        except (ValueError, TypeError, AttributeError):
+            pass  # Not a valid GeoPoint, continue with other checks
+    
     # Handle DatetimeWithNanoseconds (Firestore timestamp type)
     # Check for the type by class name or attributes
-    type_name = type(value).__name__
     if type_name == 'DatetimeWithNanoseconds' or (hasattr(value, 'timestamp') and hasattr(value, 'nanoseconds')):
         # This is a DatetimeWithNanoseconds or similar Firestore timestamp
         try:
@@ -83,24 +126,6 @@ def _serialize_value(value: Any) -> Any:
         except Exception as e:
             logger.warning(f"Failed to convert timestamp: {str(e)}")
             return str(value)
-    
-    # Handle Firestore GeoPoint
-    if GeoPoint is not None and isinstance(value, GeoPoint):
-        # Convert GeoPoint to dict with latitude and longitude
-        return {
-            "latitude": value.latitude,
-            "longitude": value.longitude
-        }
-    
-    # Check for GeoPoint-like objects (has latitude and longitude attributes)
-    if hasattr(value, 'latitude') and hasattr(value, 'longitude'):
-        try:
-            return {
-                "latitude": float(value.latitude),
-                "longitude": float(value.longitude)
-            }
-        except (ValueError, TypeError):
-            pass  # Not a valid GeoPoint, continue with other checks
     
     # Handle datetime objects
     if isinstance(value, datetime):

@@ -1,0 +1,272 @@
+---
+alwaysApply: true
+---
+## Architecture
+
+### Layered Design
+- Routes → Services → Repositories
+- No business logic in routes
+- Database is the source of truth
+- Event-driven communication over persistent connections
+
+### Scalability Rules
+- Design for horizontal scaling
+- Never rely on in-memory state
+- Use background tasks or async workers for fan-out
+- Assume mobile clients disconnect frequently
+
+---
+
+## Technology Standards
+
+### Backend
+- FastAPI (async-first)
+- Firebase Admin SDK
+- Firestore
+- Firebase Cloud Messaging (FCM)
+- Google Maps Platform
+- Optional: Pub/Sub, Cloud Tasks, Celery
+
+---
+
+yaml
+Copy code
+
+- Organize by **feature/domain**
+- Never organize by file type
+
+---
+
+## API Standards
+
+### General Rules
+- Version APIs from day one (`/api/v1`)
+- Use Pydantic schemas for all inputs and outputs
+- Validate and sanitize all inputs
+- Return meaningful HTTP status codes
+- Implement idempotent endpoints where possible
+
+---
+
+## Authentication & Authorization
+
+### Firebase Authentication
+- Use Firebase Admin SDK on backend
+- Verify Firebase ID token on every protected request
+- Extract user context via FastAPI dependencies
+- Use custom claims for RBAC
+- Never expose service account keys
+
+---
+
+## Ride Dispatch (NO Sockets)
+
+### Core Rule
+**WebSockets and Socket.IO are forbidden for ride dispatch.**
+
+Ride communication must be:
+- Event-driven
+- Push-based
+- Database-backed
+
+---
+
+## Ride Request Flow
+
+### Rider Requests Ride
+1. Rider sends HTTP request
+2. FastAPI validates token
+3. Ride stored in Firestore
+4. `ride_requested` event emitted
+5. Nearby drivers notified via FCM
+
+### Driver Accepts Ride
+- Driver calls REST endpoint
+- Firestore transaction ensures first-accept wins
+- Reject late accept attempts
+- Update ride status atomically
+
+---
+
+## Driver Notification Rules
+
+### Push Notifications
+- Use Firebase Cloud Messaging (FCM)
+- Include ride ID and expiry timestamp
+- Never rely on client-side state
+- Push must work when app is backgrounded
+
+---
+
+## Firestore Design Rules
+
+### Documents
+- Keep documents flat (max 2–3 levels)
+- Use subcollections only for one-to-many relationships
+- Limit document size to < 1MB
+
+### Rides Collection
+```json
+rides/{rideId} {
+  status,
+  riderId,
+  driverId,
+  pickup,
+  dropoff,
+  createdAt,
+  expiresAt
+}
+Firestore Usage
+Use transactions for concurrency
+
+Use batch writes for fan-out
+
+Index all query fields
+
+Use server timestamps
+
+Location Tracking
+Driver Location Updates
+Use HTTP endpoints only
+
+Throttle updates (5–10 seconds)
+
+Store timestamped coordinates
+
+Expire stale locations automatically
+
+Never stream continuous location data
+
+Google Maps Platform Rules
+API Key Security
+Separate keys per environment
+
+Restrict keys by API and referrer
+
+Enable billing alerts
+
+Rotate keys periodically
+
+Optimization
+Cache geocoding results
+
+Use Places Autocomplete
+
+Limit requested fields
+
+Batch requests where possible
+
+Background Processing
+Allowed Tools
+FastAPI BackgroundTasks
+
+Cloud Tasks
+
+Pub/Sub
+
+Celery (Redis broker)
+
+Rules
+Background jobs must be idempotent
+
+No long-running work in request handlers
+
+Retry with exponential backoff
+
+Error Handling
+Error Rules
+Use custom exception classes
+
+Centralized error handling
+
+Never expose stack traces in production
+
+Log with request context
+
+Fail fast in development
+
+Logging & Observability
+Logging
+Structured JSON logs
+
+Include correlation IDs
+
+Never log secrets or tokens
+
+Metrics
+Track ride request latency
+
+Track push notification success
+
+Monitor Firestore quotas
+
+Monitor Google Maps usage
+
+Performance
+Backend
+Async I/O only
+
+No blocking calls
+
+Use connection pooling
+
+Cache frequently accessed data
+
+Database
+Query by indexed fields only
+
+Avoid full scans
+
+Paginate all list endpoints
+
+Security Standards
+HTTPS everywhere
+
+Rate limit all public endpoints
+
+Validate all inputs
+
+Use least-privilege IAM
+
+Keep dependencies updated
+
+Scan for vulnerabilities
+
+Testing Strategy
+Coverage
+Unit tests for services
+
+Integration tests for APIs
+
+Firebase Emulator Suite for Firestore and Auth
+
+Mock Google Maps APIs
+
+Concurrency Testing
+Test multiple drivers accepting the same ride
+
+Ensure transaction safety
+
+Version Control
+Git Rules
+Feature branches only
+
+Conventional Commits
+
+Pull requests required
+
+Code review before merge
+
+Final Enforcement Rules
+❌ No Socket.IO
+
+❌ No persistent WebSocket dispatch
+
+❌ No in-memory state
+
+✅ Event-driven architecture
+
+✅ Push notifications for real-time delivery
+
+✅ Firestore is the single source of truth
+
