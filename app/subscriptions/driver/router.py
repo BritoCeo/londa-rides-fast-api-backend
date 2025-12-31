@@ -70,7 +70,17 @@ async def get_driver_subscription_by_id(
     """Get subscription status for a specific driver by ID"""
     try:
         current_driver_id = current_driver["uid"]
-        subscription = await service.get_subscription_by_id(current_driver_id, driver_id)
+        
+        # Authorization: drivers can only view their own subscription
+        if driver_id != current_driver_id:
+            from app.core.exceptions import ForbiddenError
+            raise ForbiddenError("You can only view your own subscription")
+        
+        subscription = await service.get_subscription_status(driver_id)
+        
+        if not subscription:
+            from app.core.exceptions import NotFoundError
+            raise NotFoundError("Subscription not found")
         
         return success_response(
             message="Subscription retrieved successfully",

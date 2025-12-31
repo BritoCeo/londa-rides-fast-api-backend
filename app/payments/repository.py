@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, List
 from firebase_admin import firestore
 from app.core.firebase import get_firestore
 from app.core.logging import logger
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import NotFoundError, ValidationError
 from app.core.serializers import serialize_firestore_document
 
 
@@ -85,8 +85,34 @@ class PaymentRepository:
                 .offset(offset)
             )
             
-            docs = query.stream()
-            payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
+            try:
+                docs = query.stream()
+                payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
+            except Exception as query_error:
+                error_msg = str(query_error)
+                # Check if it's a Firestore index error
+                if "requires an index" in error_msg or "FailedPrecondition" in error_msg:
+                    logger.error(f"Firestore index required for user payments query: {error_msg}")
+                    # Extract index creation URL if present
+                    import re
+                    match = re.search(r'https://[^\s\)]+', error_msg)
+                    if match:
+                        index_url = match.group(0)
+                        raise ValidationError(
+                            f"Firestore index required for this query. "
+                            f"Please create the index at: {index_url}\n\n"
+                            f"Or manually create a composite index:\n"
+                            f"- Collection: payments\n"
+                            f"- Fields: userId (Ascending), createdAt (Descending)"
+                        )
+                    else:
+                        raise ValidationError(
+                            f"Firestore index required for this query. "
+                            f"Please create a composite index:\n"
+                            f"- Collection: payments\n"
+                            f"- Fields: userId (Ascending), createdAt (Descending)"
+                        )
+                raise
             
             total_query = self.db.collection(self.collection).where(filter=firestore.FieldFilter("userId", "==", user_id))
             total_docs = total_query.stream()
@@ -100,6 +126,8 @@ class PaymentRepository:
                 "hasMore": (page * limit) < total
             }
             
+        except ValidationError:
+            raise
         except Exception as e:
             logger.error(f"Error getting user payments: {str(e)}")
             raise

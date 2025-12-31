@@ -7,7 +7,7 @@ from firebase_admin import firestore
 from app.core.firebase import get_firestore
 from app.core.config import settings
 from app.core.logging import logger
-from app.core.exceptions import NotFoundError
+from app.core.exceptions import NotFoundError, ValidationError
 from app.core.serializers import serialize_firestore_document
 
 
@@ -163,16 +163,43 @@ class DriverSubscriptionRepository:
         try:
             offset = (page - 1) * limit
             
+            # Use filter keyword argument (best practice - avoids deprecation warning)
             query = (
                 self.db.collection("subscription_payments")
-                .where("driverId", "==", driver_id)
+                .where(filter=firestore.FieldFilter("driverId", "==", driver_id))
                 .order_by("createdAt", direction=firestore.Query.DESCENDING)
                 .limit(limit)
                 .offset(offset)
             )
             
-            docs = query.stream()
-            payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
+            try:
+                docs = query.stream()
+                payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
+            except Exception as query_error:
+                error_msg = str(query_error)
+                # Check if it's a Firestore index error
+                if "requires an index" in error_msg or "FailedPrecondition" in error_msg:
+                    logger.error(f"Firestore index required for payment history query: {error_msg}")
+                    # Extract index creation URL if present
+                    import re
+                    match = re.search(r'https://[^\s\)]+', error_msg)
+                    if match:
+                        index_url = match.group(0)
+                        raise ValidationError(
+                            f"Firestore index required for this query. "
+                            f"Please create the index at: {index_url}\n\n"
+                            f"Or manually create a composite index:\n"
+                            f"- Collection: subscription_payments\n"
+                            f"- Fields: driverId (Ascending), createdAt (Descending)"
+                        )
+                    else:
+                        raise ValidationError(
+                            f"Firestore index required for this query. "
+                            f"Please create a composite index:\n"
+                            f"- Collection: subscription_payments\n"
+                            f"- Fields: driverId (Ascending), createdAt (Descending)"
+                        )
+                raise
             
             total_query = self.db.collection("subscription_payments").where(filter=firestore.FieldFilter("driverId", "==", driver_id))
             total_docs = total_query.stream()
@@ -186,6 +213,8 @@ class DriverSubscriptionRepository:
                 "hasMore": (page * limit) < total
             }
             
+        except ValidationError:
+            raise
         except Exception as e:
             logger.error(f"Error getting payment history: {str(e)}")
             raise
