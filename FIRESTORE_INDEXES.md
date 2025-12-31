@@ -1,5 +1,14 @@
 # 🔥 Firestore Indexes Required
 
+## ⚠️ Action Required
+
+**The following index is currently missing and causing errors:**
+- `rides` collection: `status` (ASC) + `createdAt` (DESC)
+
+**Quick Fix:** Click the [direct link](#3-rides-collection---pending-rides-query) in section 3 below to create it instantly, or use the Firebase CLI method.
+
+---
+
 ## Overview
 
 Firestore requires composite indexes for queries that filter and order by different fields. This document lists all required indexes for the Londa API.
@@ -67,6 +76,12 @@ Firestore requires composite indexes for queries that filter and order by differ
 **Collection:** `rides`
 
 **Index Creation:**
+
+**🚀 Quick Create (Recommended):**
+Click this direct link to create the index automatically:
+[Create Index Now](https://console.firebase.google.com/v1/r/project/londa-cd054/firestore/indexes?create_composite=Cklwcm9qZWN0cy9sb25kYS1jZDA1NC9kYXRhYmFzZXMvKGRlZmF1bHQpL2NvbGxlY3Rpb25Hcm91cHMvcmlkZXMvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaDQoJY3JlYXRlZEF0EAIaDAoIX19uYW1lX18QAg)
+
+**Manual Creation:**
 1. Go to Firebase Console → Firestore → Indexes
 2. Click "Create Index"
 3. Set:
@@ -92,66 +107,19 @@ Firestore requires composite indexes for queries that filter and order by differ
    - Add fields with correct order
    - Click "Create"
 
-### Using Firebase CLI (Alternative)
+### Using Firebase CLI (Recommended for Production)
 
-If you have `firebase-tools` installed:
+If you have `firebase-tools` installed, you can deploy all indexes at once:
 
 ```bash
-firebase init firestore
-# Then edit firestore.indexes.json and add:
-{
-  "indexes": [
-    {
-      "collectionGroup": "rides",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "rides",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "driverId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "rides",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    }
-  ],
-  "fieldOverrides": []
-}
-```
+# Make sure you're logged in
+firebase login
 
-Then deploy:
-```bash
+# Deploy indexes from firestore.indexes.json
 firebase deploy --only firestore:indexes
 ```
+
+**Note:** The `firestore.indexes.json` file is already created in the project root with all required indexes.
 
 ---
 

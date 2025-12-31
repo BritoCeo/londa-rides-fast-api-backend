@@ -8,6 +8,7 @@ from app.core.firebase import get_firestore
 from app.core.config import settings
 from app.core.logging import logger
 from app.core.exceptions import NotFoundError
+from app.core.serializers import serialize_firestore_document
 
 
 class ParentSubscriptionRepository:
@@ -63,7 +64,8 @@ class ParentSubscriptionRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise Exception("Failed to create subscription")
             
@@ -84,7 +86,8 @@ class ParentSubscriptionRepository:
             
             docs = query.stream()
             for doc in docs:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else None
             
             return None
             
@@ -106,7 +109,8 @@ class ParentSubscriptionRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise NotFoundError(f"Subscription {subscription_id} not found")
             
@@ -126,7 +130,7 @@ class ParentSubscriptionRepository:
             )
             
             docs = query.stream()
-            children = [doc.to_dict() for doc in docs]
+            children = [serialize_firestore_document(doc.to_dict()) for doc in docs]
             
             return children
             
@@ -168,7 +172,8 @@ class ParentSubscriptionRepository:
             
             doc = child_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise Exception("Failed to create child profile")
             
@@ -199,11 +204,11 @@ class ParentSubscriptionRepository:
             )
             
             docs = query.stream()
-            rides = [doc.to_dict() for doc in docs]
+            rides = [serialize_firestore_document(doc.to_dict()) for doc in docs]
             
             completed_rides = [r for r in rides if r.get("status") == "completed"]
             
-            return {
+            result = {
                 "month": month,
                 "year": year,
                 "totalRides": len(rides),
@@ -211,6 +216,8 @@ class ParentSubscriptionRepository:
                 "cancelledRides": len([r for r in rides if r.get("status") == "cancelled"]),
                 "rides": completed_rides
             }
+            
+            return serialize_firestore_document(result)
             
         except Exception as e:
             logger.error(f"Error getting usage stats: {str(e)}")

@@ -8,6 +8,7 @@ from app.core.firebase import get_firestore
 from app.core.config import settings
 from app.core.logging import logger
 from app.core.exceptions import NotFoundError
+from app.core.serializers import serialize_firestore_document
 
 
 class DriverSubscriptionRepository:
@@ -46,7 +47,8 @@ class DriverSubscriptionRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise Exception("Failed to create subscription")
             
@@ -67,7 +69,8 @@ class DriverSubscriptionRepository:
             
             docs = query.stream()
             for doc in docs:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else None
             
             return None
             
@@ -82,7 +85,8 @@ class DriverSubscriptionRepository:
             doc = doc_ref.get()
             
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else None
             
             return None
             
@@ -104,7 +108,8 @@ class DriverSubscriptionRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise NotFoundError(f"Subscription {subscription_id} not found")
             
@@ -139,7 +144,8 @@ class DriverSubscriptionRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise Exception("Failed to create payment record")
             
@@ -166,7 +172,7 @@ class DriverSubscriptionRepository:
             )
             
             docs = query.stream()
-            payments = [doc.to_dict() for doc in docs]
+            payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
             
             total_query = self.db.collection("subscription_payments").where(filter=firestore.FieldFilter("driverId", "==", driver_id))
             total_docs = total_query.stream()

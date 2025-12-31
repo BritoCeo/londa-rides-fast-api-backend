@@ -6,6 +6,7 @@ from firebase_admin import firestore
 from app.core.firebase import get_firestore
 from app.core.logging import logger
 from app.core.exceptions import NotFoundError
+from app.core.serializers import serialize_firestore_document
 
 
 class PaymentRepository:
@@ -40,7 +41,8 @@ class PaymentRepository:
             
             doc = doc_ref.get()
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else {}
             
             raise Exception("Failed to create payment")
             
@@ -55,7 +57,8 @@ class PaymentRepository:
             doc = doc_ref.get()
             
             if doc.exists:
-                return doc.to_dict()
+                doc_dict = doc.to_dict()
+                return serialize_firestore_document(doc_dict) if doc_dict else None
             
             return None
             
@@ -83,7 +86,7 @@ class PaymentRepository:
             )
             
             docs = query.stream()
-            payments = [doc.to_dict() for doc in docs]
+            payments = [serialize_firestore_document(doc.to_dict()) for doc in docs]
             
             total_query = self.db.collection(self.collection).where(filter=firestore.FieldFilter("userId", "==", user_id))
             total_docs = total_query.stream()
