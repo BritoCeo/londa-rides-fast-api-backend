@@ -1,0 +1,2 @@
+"""Ride domain module"""
+
