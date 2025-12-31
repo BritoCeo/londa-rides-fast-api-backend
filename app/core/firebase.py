@@ -2,7 +2,8 @@
 Firebase Admin SDK Initialization
 """
 import os
-from typing import Optional
+import json
+from typing import Optional, Dict, Any
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 from app.core.config import settings
@@ -23,15 +24,44 @@ def initialize_firebase() -> None:
         return
     
     try:
-        # Check if credentials path is provided
-        if settings.FIREBASE_CREDENTIALS_PATH and os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
+        cred = None
+        
+        # Priority 1: Check for JSON content in environment variable (for cloud deployments like Render)
+        if settings.FIREBASE_CREDENTIALS_JSON:
+            try:
+                # Parse JSON string to dict
+                if isinstance(settings.FIREBASE_CREDENTIALS_JSON, str):
+                    cred_dict = json.loads(settings.FIREBASE_CREDENTIALS_JSON)
+                    cred = credentials.Certificate(cred_dict)
+                    logger.info("Firebase initialized with credentials from JSON environment variable")
+                else:
+                    # Already a dict
+                    cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_JSON)
+                    logger.info("Firebase initialized with credentials from JSON dict")
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse FIREBASE_CREDENTIALS_JSON: {str(e)}")
+                raise ValueError("FIREBASE_CREDENTIALS_JSON must be valid JSON")
+        
+        # Priority 2: Check if credentials path is provided and file exists
+        elif settings.FIREBASE_CREDENTIALS_PATH and os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
             cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
-            _firebase_app = firebase_admin.initialize_app(cred)
             logger.info(f"Firebase initialized with credentials from {settings.FIREBASE_CREDENTIALS_PATH}")
+        
+        # Priority 3: Try to use default credentials (for cloud environments like GCP)
         else:
-            # Try to use default credentials (for cloud environments)
-            _firebase_app = firebase_admin.initialize_app()
-            logger.info("Firebase initialized with default credentials")
+            try:
+                _firebase_app = firebase_admin.initialize_app()
+                logger.info("Firebase initialized with default credentials")
+            except Exception as default_error:
+                logger.warning(f"Default credentials not available: {str(default_error)}")
+                raise ValueError(
+                    "Firebase credentials not found. Set either FIREBASE_CREDENTIALS_PATH "
+                    "(file path) or FIREBASE_CREDENTIALS_JSON (JSON content) environment variable."
+                )
+        
+        # Initialize app with credentials if we have them
+        if cred is not None:
+            _firebase_app = firebase_admin.initialize_app(cred)
         
         # Initialize Firestore using the initialized app
         _db = firestore.client(_firebase_app)

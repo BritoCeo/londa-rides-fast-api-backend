@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     
     # Firebase Configuration
     FIREBASE_CREDENTIALS_PATH: Optional[str] = None
+    FIREBASE_CREDENTIALS_JSON: Optional[str] = None  # For cloud deployments (JSON content as string)
     FIREBASE_PROJECT_ID: str = "londa-cd054"
     
     # Google Maps API
