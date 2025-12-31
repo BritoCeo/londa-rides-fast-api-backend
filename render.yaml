@@ -1,0 +1,81 @@
+services:
+  - type: web
+    name: londa-apis
+    runtime: python
+    plan: free  # Change to 'starter' or 'standard' for production
+    region: oregon  # Options: oregon, frankfurt, singapore, mumbai, tokyo
+    branch: main  # Your git branch
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # Server Configuration
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: DEBUG
+        value: false
+      
+      # Project Information
+      - key: PROJECT_NAME
+        value: Londa APIs
+      - key: VERSION
+        value: 1.0.0
+      - key: API_V1_STR
+        value: /api/v1
+      
+      # CORS Configuration (comma-separated or JSON array)
+      - key: BACKEND_CORS_ORIGINS
+        value: https://yourdomain.com,https://www.yourdomain.com
+        # For multiple origins, use comma-separated string or JSON array format
+        # Example: "https://app1.com,https://app2.com"
+        # Or: '["https://app1.com","https://app2.com"]'
+      
+      # Security (IMPORTANT: Set SECRET_KEY in Render dashboard!)
+      # Generate a strong secret: openssl rand -base64 32
+      # Set SECRET_KEY in Render dashboard as environment variable
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: DRIVER_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: USER_TOKEN_EXPIRE_DAYS
+        value: 30
+      
+      # Firebase Configuration
+      # IMPORTANT: Set FIREBASE_CREDENTIALS_JSON in Render dashboard with the full JSON content
+      # of your Firebase service account key (not a file path)
+      - key: FIREBASE_PROJECT_ID
+        value: londa-cd054
+      # FIREBASE_CREDENTIALS_JSON should be set in Render dashboard as environment variable
+      # It should contain the full JSON content of your Firebase service account key
+      # Example: Copy entire content from your service-account-key.json file
+      
+      # Google Maps API
+      # Set GOOGLE_MAPS_API_KEY in Render dashboard
+      
+      # SMTP Configuration
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      # Set SMTP_USER, SMTP_PASS, SMTP_FROM in Render dashboard
+      # Set EMAIL_ACTIVATION_SECRET in Render dashboard
+      
+      # Business Constants
+      - key: DRIVER_SUBSCRIPTION_AMOUNT
+        value: 150.00
+      - key: PARENT_SUBSCRIPTION_AMOUNT
+        value: 1000.00
+      - key: DEFAULT_RIDE_FARE
+        value: 13.00
+      
+      # Logging
+      - key: LOG_LEVEL
+        value: INFO
+      
+      # Optional: Nylas API
+      # Set NYLAS_API_KEY in Render dashboard if needed
+
