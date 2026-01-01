@@ -13,6 +13,12 @@
 2. [Response Format](#response-format)
 3. [Error Handling](#error-handling)
 4. [User Authentication APIs](#1-user-authentication-apis)
+   - 1.1 Register User (Send OTP)
+   - 1.2 Verify OTP (Login)
+   - 1.3 Request Email OTP
+   - 1.4 Verify Email OTP
+   - 1.5 Create User Account
+   - 1.6 Refresh Token
 5. [User Profile APIs](#2-user-profile-apis)
 6. [Ride Management APIs (User)](#3-ride-management-apis-user)
 7. [Driver Authentication APIs](#4-driver-authentication-apis)
@@ -306,6 +312,86 @@ All error responses follow this format:
   "timestamp": "2024-12-31T19:00:00.000000"
 }
 ```
+
+---
+
+### 1.6 Refresh Token
+
+**Endpoint:** `POST /api/v1/refresh-token`  
+**Authentication:** Required (Bearer token - can be expired)  
+**Description:** Refreshes an expired or valid authentication token. Accepts Firebase ID tokens or custom tokens (even if expired), verifies the user exists, and returns a new custom token. Works for both users and drivers.
+
+#### Request Headers
+
+```
+Authorization: Bearer <your_token>
+```
+
+**Note:** The token can be expired. The endpoint will decode it to extract user information and generate a new token.
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Token refreshed successfully",
+  "data": {
+    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "zdXCHy7je3OaOVC4qHwS",
+      "phone_number": "+264813442530",
+      "email": "user@example.com",
+      "name": "John Doe",
+      "userType": "student",
+      "createdAt": "2024-12-31T19:00:00.000000",
+      "updatedAt": "2024-12-31T19:00:00.000000"
+    }
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `accessToken` | string | New Firebase custom token (exchange for ID token on client) |
+| `user` | object | User profile data (or driver data if user is a driver) |
+
+#### Error Responses
+
+**401 Unauthorized - Invalid Token:**
+```json
+{
+  "success": false,
+  "message": "Invalid token format",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+**401 Unauthorized - User Not Found:**
+```json
+{
+  "success": false,
+  "message": "User not found. Please re-authenticate.",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+#### Usage Notes
+
+- **Token Expiration:** Firebase ID tokens expire after 1 hour. Use this endpoint to refresh expired tokens without requiring re-authentication.
+- **Client-Side:** After receiving the new `accessToken`, exchange it for an ID token using the Firebase SDK on the client side.
+- **Automatic Refresh:** The Firebase SDK can automatically refresh tokens, but this endpoint provides a server-side refresh option.
+- **Unified Endpoint:** Works for both users and drivers - the endpoint automatically detects the user type.
 
 ---
 
@@ -1275,11 +1361,41 @@ GET /api/v1/driver/available-rides?limit=50
 }
 ```
 
+**Note:** The `driver_id` is automatically extracted from the authentication token. Do not include it in the request body.
+
 #### Request Parameters
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `payment_method` | string | Yes | Payment method (currently only "cash" is supported) |
+
+#### Error Responses
+
+**401 Unauthorized - Missing Token:**
+```json
+{
+  "success": false,
+  "message": "Unauthorized",
+  "error": {
+    "code": "UNAUTHORIZED",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+**409 Conflict - Subscription Already Exists:**
+```json
+{
+  "success": false,
+  "message": "Driver already has an active subscription",
+  "error": {
+    "code": "CONFLICT",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
 
 #### Response (201 Created)
 
@@ -1556,6 +1672,8 @@ GET /api/v1/driver/subscription/history/driver_123?page=1&limit=10
   ]
 }
 ```
+
+**Note:** The `user_id` is automatically extracted from the authentication token. Do not include it in the request body.
 
 #### Request Parameters
 
@@ -2333,11 +2451,15 @@ Valid subscription status values:
 3. **Use Token:**
    - Include `Authorization: Bearer <token>` in all protected requests
 
+4. **Refresh Token (when expired):**
+   - `POST /api/v1/refresh-token` → Get new `accessToken` (works with expired tokens)
+
 ### Common Endpoints
 
 | Purpose | Endpoint | Method |
 |---------|----------|--------|
 | Health Check | `/api/v1/health` | GET |
+| Refresh Token | `/api/v1/refresh-token` | POST |
 | User Profile | `/api/v1/me` | GET |
 | Request Ride | `/api/v1/request-ride` | POST |
 | Get Rides | `/api/v1/get-rides` | GET |
