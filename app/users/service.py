@@ -7,10 +7,11 @@ from firebase_admin import auth
 from app.core.firebase import get_firebase_auth
 from app.core.config import settings
 from app.core.logging import logger
-from app.core.exceptions import ValidationError, NotFoundError, ConflictError
+from app.core.exceptions import ValidationError, NotFoundError, ConflictError, UnauthorizedError
 from app.users.repository import UserRepository
 from app.users.schemas import CreateAccountRequest, UpdateProfileRequest, UpdateLocationRequest
 from app.core.serializers import serialize_firestore_document
+from app.core.security import decode_token_without_verification
 
 
 class UserService:
@@ -301,4 +302,116 @@ class UserService:
         except Exception as e:
             logger.error(f"Error updating location: {str(e)}")
             raise ValidationError(f"Failed to update location: {str(e)}")
+    
+    async def refresh_token(self, token: str) -> Dict[str, Any]:
+        """
+        Refresh authentication token for users and drivers.
+        Accepts expired or valid tokens, decodes them to extract user information,
+        verifies user exists, and generates a new custom token.
+        
+        Args:
+            token: Firebase ID token or custom token (can be expired)
+            
+        Returns:
+            Dict with new accessToken and user info
+            
+        Raises:
+            UnauthorizedError: If token is invalid or user doesn't exist
+        """
+        try:
+            # Decode token without verification to extract user_id (works even if expired)
+            token_data = decode_token_without_verification(token)
+            user_id = token_data.get("uid")
+            token_user_type = token_data.get("user_type", "user")
+            
+            if not user_id:
+                raise UnauthorizedError("Invalid token: missing user identifier")
+            
+            # Verify user exists in Firebase Auth
+            try:
+                user_record = self.auth.get_user(user_id)
+                logger.info(f"User {user_id} verified in Firebase Auth for token refresh")
+            except firebase_auth.UserNotFoundError:
+                logger.error(f"User {user_id} not found in Firebase Auth")
+                raise UnauthorizedError("User not found. Please re-authenticate.")
+            
+            # Get user_type from Firestore or Firebase Auth custom claims
+            # Priority: Firestore userType > Firebase Auth custom claims > token user_type
+            user_type = token_user_type
+            try:
+                user_doc = await self.repository.get_user_by_id(user_id)
+                if user_doc and user_doc.get("userType"):
+                    user_type = user_doc.get("userType")
+                else:
+                    # Check Firebase Auth custom claims
+                    custom_claims = user_record.custom_claims or {}
+                    if custom_claims.get("user_type"):
+                        user_type = custom_claims.get("user_type")
+            except Exception as e:
+                logger.warning(f"Could not get user_type from Firestore: {str(e)}")
+                # Use token user_type as fallback
+            
+            # Determine if user is driver or regular user
+            # Check Firestore for driver document if user_type is not clear
+            if user_type == "user":
+                # Check if user is actually a driver
+                try:
+                    from app.drivers.repository import DriverRepository
+                    driver_repo = DriverRepository()
+                    driver_doc = await driver_repo.get_driver_by_id(user_id)
+                    if driver_doc:
+                        user_type = "driver"
+                except Exception:
+                    pass  # Not a driver, keep as user
+            
+            # Generate new custom token with appropriate claims
+            custom_claims = {
+                "user_type": user_type
+            }
+            custom_token = auth.create_custom_token(user_id, custom_claims)
+            
+            # Ensure custom_token is a string
+            if isinstance(custom_token, bytes):
+                custom_token = custom_token.decode('utf-8')
+            elif not isinstance(custom_token, str):
+                custom_token = str(custom_token)
+            
+            # Update custom claims on Firebase Auth user
+            try:
+                self.auth.set_custom_user_claims(user_id, custom_claims)
+                logger.info(f"Updated custom claims for user: {user_id}, type: {user_type}")
+            except Exception as e:
+                logger.warning(f"Could not update custom claims: {str(e)}")
+                # Continue - custom token will still work
+            
+            # Get user document (from users or drivers collection)
+            user_doc = None
+            if user_type == "driver":
+                try:
+                    from app.drivers.repository import DriverRepository
+                    driver_repo = DriverRepository()
+                    user_doc = await driver_repo.get_driver_by_id(user_id)
+                except Exception as e:
+                    logger.warning(f"Could not get driver document: {str(e)}")
+            
+            if not user_doc:
+                # Try to get from users collection
+                user_doc = await self.repository.get_user_by_id(user_id)
+            
+            # Serialize Firestore document
+            if user_doc:
+                user_doc = serialize_firestore_document(user_doc)
+            
+            logger.info(f"Token refreshed successfully for user: {user_id}, type: {user_type}")
+            
+            return {
+                "accessToken": custom_token,
+                "user": user_doc
+            }
+            
+        except UnauthorizedError:
+            raise
+        except Exception as e:
+            logger.error(f"Error refreshing token: {str(e)}")
+            raise UnauthorizedError(f"Failed to refresh token: {str(e)}")
 

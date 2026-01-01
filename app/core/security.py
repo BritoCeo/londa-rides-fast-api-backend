@@ -219,3 +219,63 @@ async def get_current_driver(
         "user_type": "driver",
     }
 
+
+def decode_token_without_verification(token: str) -> Dict[str, Any]:
+    """
+    Decode Firebase token without verification to extract user information.
+    This is used for token refresh where we need to extract user_id even from expired tokens.
+    
+    Args:
+        token: Firebase ID token or custom token (can be expired)
+        
+    Returns:
+        Dictionary with uid and user_type extracted from token
+        
+    Raises:
+        UnauthorizedError: If token format is invalid
+    """
+    try:
+        import base64
+        import json
+        
+        # Split JWT into parts
+        parts = token.split('.')
+        if len(parts) != 3:
+            raise UnauthorizedError("Invalid token format")
+        
+        # Decode payload (add padding if needed)
+        payload_b64 = parts[1]
+        padding = len(payload_b64) % 4
+        if padding:
+            payload_b64 += '=' * (4 - padding)
+        
+        # Decode base64
+        payload_bytes = base64.urlsafe_b64decode(payload_b64)
+        decoded = json.loads(payload_bytes.decode('utf-8'))
+        
+        # Extract user_id (uid) from token
+        # ID tokens use 'user_id' or 'sub', custom tokens use 'uid'
+        user_id = decoded.get('uid') or decoded.get('user_id') or decoded.get('sub')
+        if not user_id:
+            raise UnauthorizedError("Invalid token: missing user identifier")
+        
+        # Extract user_type from custom claims or token payload
+        # ID tokens have claims in 'user_type', custom tokens may have it in payload
+        user_type = decoded.get('user_type') or decoded.get('claims', {}).get('user_type', 'user')
+        
+        logger.info(f"Decoded token (without verification) for user: {user_id}, type: {user_type}")
+        
+        return {
+            "uid": user_id,
+            "user_type": user_type,
+            "email": decoded.get('email'),
+            "phone_number": decoded.get('phone_number'),
+        }
+        
+    except (ValueError, json.JSONDecodeError, KeyError) as e:
+        logger.error(f"Failed to decode token: {str(e)}")
+        raise UnauthorizedError("Invalid token format")
+    except Exception as e:
+        logger.error(f"Token decode error: {str(e)}")
+        raise UnauthorizedError("Failed to decode token")
+

@@ -2,6 +2,7 @@
 User Router - API Endpoints
 """
 from fastapi import APIRouter, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.responses import success_response
 from app.core.security import get_current_user
 from app.users.service import UserService
@@ -15,9 +16,11 @@ from app.users.schemas import (
     UpdateLocationRequest
 )
 from app.core.logging import logger
+from app.core.exceptions import UnauthorizedError
 
 router = APIRouter()
 service = UserService()
+security = HTTPBearer(auto_error=False)
 
 
 @router.post("/registration", status_code=status.HTTP_201_CREATED)
@@ -167,5 +170,37 @@ async def update_location(
         
     except Exception as e:
         logger.error(f"Update location error: {str(e)}")
+        raise
+
+
+@router.post("/refresh-token", status_code=status.HTTP_200_OK)
+async def refresh_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+    Refresh authentication token.
+    Accepts expired or valid Firebase ID tokens or custom tokens.
+    Returns a new custom token that can be exchanged for an ID token.
+    Works for both users and drivers.
+    """
+    try:
+        if not credentials or not credentials.credentials:
+            raise UnauthorizedError("Authentication token required")
+        
+        token = credentials.credentials
+        result = await service.refresh_token(token)
+        
+        return success_response(
+            message="Token refreshed successfully",
+            data={
+                "accessToken": result["accessToken"],
+                "user": result["user"]
+            }
+        )
+        
+    except UnauthorizedError:
+        raise
+    except Exception as e:
+        logger.error(f"Refresh token error: {str(e)}")
         raise
 
