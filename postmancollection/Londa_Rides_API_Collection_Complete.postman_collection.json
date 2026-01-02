@@ -189,6 +189,50 @@
           "response": []
         },
         {
+          "name": "User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set(\"auth_token\", jsonData.data.accessToken);",
+                  "        if (jsonData.data.user && jsonData.data.user.id) {",
+                  "            pm.collectionVariables.set(\"user_id\", jsonData.data.user.id);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"otp\": \"123456\",\n  \"sessionInfo\": \"{{session_info}}\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base}}/login",
+              "host": ["{{api_base}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Request Email OTP",
           "request": {
             "auth": {

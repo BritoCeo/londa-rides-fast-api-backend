@@ -15,10 +15,11 @@
 4. [User Authentication APIs](#1-user-authentication-apis)
    - 1.1 Register User (Send OTP)
    - 1.2 Verify OTP (Login)
-   - 1.3 Request Email OTP
-   - 1.4 Verify Email OTP
-   - 1.5 Create User Account
-   - 1.6 Refresh Token
+   - 1.3 User Login
+   - 1.4 Request Email OTP
+   - 1.5 Verify Email OTP
+   - 1.6 Create User Account
+   - 1.7 Refresh Token
 5. [User Profile APIs](#2-user-profile-apis)
 6. [Ride Management APIs (User)](#3-ride-management-apis-user)
 7. [Driver Authentication APIs](#4-driver-authentication-apis)
@@ -198,7 +199,62 @@ All error responses follow this format:
 
 ---
 
-### 1.3 Request Email OTP
+### 1.3 User Login
+
+**Endpoint:** `POST /api/v1/login`  
+**Authentication:** Not required  
+**Description:** User login with OTP (same as verify-otp, different endpoint name for consistency with driver endpoints).
+
+#### Request Body
+
+```json
+{
+  "phone_number": "+264813442530",
+  "otp": "123456",
+  "sessionInfo": "AIzaSyBwA-lP2mV3VIyXesj7bzhvR0WC2sGnTPs"
+}
+```
+
+#### Request Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `phone_number` | string | Yes | Phone number in E.164 format |
+| `otp` | string | Yes | OTP code (4-6 digits) |
+| `sessionInfo` | string | No | Session info from registration response |
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "zdXCHy7je3OaOVC4qHwS",
+      "phone_number": "+264813442530",
+      "email": null,
+      "name": null,
+      "userType": null,
+      "createdAt": "2024-12-31T19:00:00.000000",
+      "updatedAt": "2024-12-31T19:00:00.000000"
+    }
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `accessToken` | string | Firebase custom token (exchange for ID token on client) |
+| `user` | object | User profile data |
+
+---
+
+### 1.4 Request Email OTP
 
 **Endpoint:** `POST /api/v1/email-otp-request`  
 **Authentication:** Not required  
@@ -233,7 +289,7 @@ All error responses follow this format:
 
 ---
 
-### 1.4 Verify Email OTP
+### 1.5 Verify Email OTP
 
 **Endpoint:** `PUT /api/v1/email-otp-verify`  
 **Authentication:** Not required  
@@ -268,7 +324,7 @@ All error responses follow this format:
 
 ---
 
-### 1.5 Create User Account
+### 1.6 Create User Account
 
 **Endpoint:** `POST /api/v1/create-account`  
 **Authentication:** Required (Bearer token)  
@@ -315,7 +371,7 @@ All error responses follow this format:
 
 ---
 
-### 1.6 Refresh Token
+### 1.7 Refresh Token
 
 **Endpoint:** `POST /api/v1/refresh-token`  
 **Authentication:** Required (Bearer token - can be expired)  
