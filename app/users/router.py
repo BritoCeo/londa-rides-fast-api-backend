@@ -63,6 +63,29 @@ async def verify_otp(request: VerifyOTPRequest):
         raise
 
 
+@router.post("/login", status_code=status.HTTP_200_OK)
+async def user_login(request: VerifyOTPRequest):
+    """User login with OTP"""
+    try:
+        result = await service.verify_phone_otp(
+            phone_number=request.phone_number,
+            otp=request.otp,
+            session_info=request.sessionInfo
+        )
+        
+        return success_response(
+            message="Login successful",
+            data={
+                "accessToken": result["accessToken"],
+                "user": result["user"]
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"User login error: {str(e)}")
+        raise
+
+
 @router.post("/email-otp-request", status_code=status.HTTP_200_OK)
 async def request_email_otp(request: EmailOTPRequest):
     """Request OTP to be sent to email address"""
