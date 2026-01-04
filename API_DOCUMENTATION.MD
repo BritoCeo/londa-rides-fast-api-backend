@@ -1,7 +1,7 @@
 # 📱 Londa Rides API - Complete Documentation
 
-**Version:** 1.0.0  
-**Last Updated:** December 31, 2024  
+**Version:** 2.0.0  
+**Last Updated:** January 2025  
 **Base URL:** `http://localhost:8000/api/v1` (Development)  
 **Production URL:** `https://api.londarides.com/api/v1` (Production)
 
@@ -30,6 +30,7 @@
 12. [Payment APIs](#9-payment-apis)
 13. [Analytics APIs](#10-analytics-apis)
 14. [Health Check APIs](#11-health-check-apis)
+15. [Frontend/Mobile App Integration](#12-frontendmobile-app-integration)
 
 ---
 
@@ -44,10 +45,19 @@ Authorization: Bearer <your_firebase_id_token>
 **How to get the token:**
 1. User/Driver registers via phone number (sends OTP)
 2. User/Driver verifies OTP
-3. API returns `accessToken` in the response
-4. Use this token for all subsequent authenticated requests
+3. API returns `accessToken` (Firebase Custom Token) in the response
+4. **Exchange custom token for ID token** using Firebase SDK on the client side
+5. Use the ID token for all subsequent authenticated requests
 
-**Note:** The token is a Firebase custom token that should be exchanged for an ID token using the Firebase SDK on the client side before making API calls.
+**⚠️ Important:** 
+- The `accessToken` returned by `/verify-otp` and `/driver/verify-otp` is a **Firebase Custom Token**
+- You MUST exchange it for an ID token using Firebase SDK before making authenticated requests
+- See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md) for complete code examples
+
+**Security Note:** 
+- `user_id` and `driver_id` are automatically extracted from the authentication token
+- Do NOT include `user_id` or `driver_id` in request bodies for protected endpoints
+- This prevents users from making requests on behalf of other users
 
 ---
 
@@ -570,7 +580,7 @@ Authorization: Bearer <your_token>
 
 **Endpoint:** `POST /api/v1/request-ride`  
 **Authentication:** Required (Bearer token)  
-**Description:** Creates a new ride request. The user ID is automatically obtained from the authentication token.
+**Description:** Creates a new ride request. The `user_id` is automatically obtained from the authentication token. **Do NOT include `user_id` in the request body.**
 
 #### Request Body
 
@@ -593,6 +603,8 @@ Authorization: Bearer <your_token>
   "passengerCount": 1
 }
 ```
+
+**⚠️ Security Note:** The `user_id` is automatically extracted from the authentication token. Including it in the request body is not required and will be ignored.
 
 #### Request Parameters
 
@@ -707,7 +719,7 @@ GET /api/v1/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5.0
 
 **Endpoint:** `POST /api/v1/cancel-ride`  
 **Authentication:** Required (Bearer token)  
-**Description:** Cancels a ride request. The user ID is automatically obtained from the authentication token.
+**Description:** Cancels a ride request. The `user_id` is automatically obtained from the authentication token. **Do NOT include `user_id` in the request body.**
 
 #### Request Body
 
@@ -717,6 +729,8 @@ GET /api/v1/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5.0
   "reason": "Changed my mind"
 }
 ```
+
+**⚠️ Security Note:** The `user_id` is automatically extracted from the authentication token. Including it in the request body is not required and will be ignored.
 
 #### Request Parameters
 
@@ -746,7 +760,7 @@ GET /api/v1/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5.0
 
 **Endpoint:** `PUT /api/v1/rate-ride`  
 **Authentication:** Required (Bearer token)  
-**Description:** Rates a completed ride. The user ID is automatically obtained from the authentication token.
+**Description:** Rates a completed ride. The `user_id` is automatically obtained from the authentication token. **Do NOT include `user_id` in the request body.**
 
 #### Request Body
 
@@ -757,6 +771,8 @@ GET /api/v1/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5.0
   "review": "Great driver, very professional!"
 }
 ```
+
+**⚠️ Security Note:** The `user_id` is automatically extracted from the authentication token. Including it in the request body is not required and will be ignored.
 
 #### Request Parameters
 
@@ -2525,15 +2541,133 @@ Valid subscription status values:
 
 ---
 
+## 12. Frontend/Mobile App Integration
+
+### Overview
+
+This section provides guidance for integrating the Londa Rides API into mobile and web applications. For complete integration examples, see the [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md).
+
+### Quick Start
+
+1. **Setup API Client** - Configure base URL and HTTP client
+2. **Implement Authentication Flow** - Register, verify OTP, exchange custom token for ID token
+3. **Add Request Interceptors** - Automatically add auth tokens to requests
+4. **Add Response Interceptors** - Handle token expiration and errors
+5. **Implement Token Refresh** - Refresh tokens before expiration
+
+### Authentication Flow Summary
+
+```
+1. POST /api/v1/registration → Get sessionInfo
+2. POST /api/v1/verify-otp → Get accessToken (Firebase Custom Token)
+3. Exchange custom token for ID token (Firebase SDK - client-side)
+4. Use ID token for all authenticated requests
+5. Refresh token when expired (use /api/v1/refresh-token or Firebase SDK)
+```
+
+### Platform-Specific Guides
+
+- **React Native**: See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md#react-native-javascripttypescript)
+- **Flutter**: See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md#flutter-dart)
+- **iOS (Swift)**: See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md#ios-swift)
+- **Android (Kotlin)**: See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md#android-kotlin)
+- **Web (JavaScript)**: See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md#web-javascripttypescript)
+
+### Key Integration Points
+
+#### 1. Token Management
+
+- Store ID tokens in secure storage (Keychain, SecureStore, EncryptedSharedPreferences)
+- Never store tokens in plain text or localStorage
+- Implement automatic token refresh before expiration
+
+#### 2. Request Format
+
+All authenticated requests must include:
+```
+Authorization: Bearer <id_token>
+Content-Type: application/json
+```
+
+#### 3. Response Parsing
+
+All responses follow this format:
+```json
+{
+  "success": true,
+  "message": "...",
+  "data": {...},
+  "timestamp": "ISO8601"
+}
+```
+
+Parse the `data` field for actual response content.
+
+#### 4. Error Handling
+
+Handle these HTTP status codes:
+- **401 Unauthorized**: Token expired or invalid → Refresh token and retry
+- **403 Forbidden**: Insufficient permissions → Check user type (user vs driver)
+- **400 Bad Request**: Invalid request data → Check request body format
+- **404 Not Found**: Resource not found → Verify resource ID
+- **409 Conflict**: Resource already exists → Handle duplicate creation
+
+#### 5. Security Best Practices
+
+- ✅ Extract `user_id`/`driver_id` from token (never from request body)
+- ✅ Use HTTPS in production
+- ✅ Never log tokens in production
+- ✅ Implement request/response interceptors for automatic token handling
+- ✅ Handle token expiration gracefully
+
+### Example: Making an Authenticated Request
+
+```typescript
+// React Native Example
+import apiClient from './apiClient';
+
+// Request a ride (user_id is automatically extracted from token)
+const response = await apiClient.post('/request-ride', {
+  pickup_location: {
+    latitude: -22.5700,
+    longitude: 17.0836,
+    name: "Pickup Point",
+    address: "123 Main Street, Windhoek"
+  },
+  dropoff_location: {
+    latitude: -22.5800,
+    longitude: 17.0900,
+    name: "Dropoff Point",
+    address: "456 Oak Avenue, Windhoek"
+  },
+  ride_type: "standard",
+  estimated_fare: 13.00,
+  passengerCount: 1
+});
+
+// Note: user_id is NOT included in the request body
+// It is automatically extracted from the Authorization token
+```
+
+### Additional Resources
+
+- [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md) - Complete integration examples for all platforms
+- [Authentication Flow Guide](./AUTHENTICATION_FLOW_GUIDE.md) - Step-by-step authentication guide
+- [Authentication Flow Explained](./AUTHENTICATION_FLOW_EXPLAINED.md) - Technical details
+- [How to Get Auth Token](./HOW_TO_GET_AUTH_TOKEN.md) - Quick reference
+
+---
+
 ## 📞 Support
 
 For API support or questions:
 - Check the [Firestore Indexes Documentation](FIRESTORE_INDEXES.md) for database setup
-- Review [Authentication Flow Guide](AUTHENTICATION_FLOW_EXPLAINED.md) for auth details
+- Review [Authentication Flow Guide](./AUTHENTICATION_FLOW_EXPLAINED.md) for auth details
+- See [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md) for mobile app integration
 - Ensure all required Firestore indexes are created before using query endpoints
 
 ---
 
-**Document Version:** 1.0.0  
-**Last Updated:** December 31, 2024  
+**Document Version:** 2.0.0  
+**Last Updated:** January 2025  
 **Maintained by:** Londa Rides Development Team

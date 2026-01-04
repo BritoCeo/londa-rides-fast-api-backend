@@ -1,17 +1,21 @@
 # 🔐 Authentication Flow Guide
 
-## Important: Registration Does NOT Require Auth Token!
+## Overview
 
-The **Registration API** (`POST /api/v1/registration`) is a **PUBLIC endpoint** and does **NOT** require an authentication token. This is the **first step** in the authentication flow.
+The Londa Rides API uses Firebase Authentication with custom tokens. The `accessToken` returned by the API is a **Firebase Custom Token** that must be exchanged for an ID token using the Firebase SDK before making authenticated requests.
 
-## 🔄 Complete Authentication Flow
+**⚠️ Important:** For mobile apps, see the [Frontend Integration Guide](../../FRONTEND_INTEGRATION_GUIDE.md) for complete code examples.
+
+---
+
+## Complete Authentication Flow
 
 ### Step 1: Register User (Send OTP) - NO AUTH REQUIRED ✅
 
-```http
-POST http://localhost:8000/api/v1/registration
-Content-Type: application/json
+**Endpoint:** `POST /api/v1/registration`
 
+**Request:**
+```json
 {
   "phone_number": "+264813442530"
 }
@@ -22,23 +26,25 @@ Content-Type: application/json
 {
   "success": true,
   "message": "OTP sent successfully",
-  "sessionInfo": "session_info_string_here",
-  "timestamp": "2024-01-01T00:00:00.000Z"
+  "data": {
+    "sessionInfo": "abc123xyz..."
+  },
+  "timestamp": "2025-01-01T00:00:00.000000"
 }
 ```
 
-**What to save:** `sessionInfo` (automatically saved to `{{session_info}}`)
+**Save:** `sessionInfo` from `data.sessionInfo`
 
-### Step 2: Verify OTP (Login) - NO AUTH REQUIRED ✅
+### Step 2: Verify OTP (Get Custom Token) - NO AUTH REQUIRED ✅
 
-```http
-POST http://localhost:8000/api/v1/verify-otp
-Content-Type: application/json
+**Endpoint:** `POST /api/v1/verify-otp`
 
+**Request:**
+```json
 {
   "phone_number": "+264813442530",
   "otp": "123456",
-  "sessionInfo": "{{session_info}}"
+  "sessionInfo": "abc123xyz..."
 }
 ```
 
@@ -46,30 +52,58 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "message": "Login successful",
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "user_123",
-    "phone_number": "+264813442530",
-    "name": "John Doe"
+  "message": "OTP verified successfully",
+  "data": {
+    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "user123",
+      "phone_number": "+264813442530",
+      "email": null,
+      "name": null,
+      "userType": null,
+      "createdAt": "2025-01-01T00:00:00.000000",
+      "updatedAt": "2025-01-01T00:00:00.000000"
+    }
   },
-  "timestamp": "2024-01-01T00:00:00.000Z"
+  "timestamp": "2025-01-01T00:00:00.000000"
 }
 ```
 
-**🎯 THIS IS WHERE YOU GET YOUR AUTH TOKEN!**
+**⚠️ Important:** The `accessToken` is a **Firebase Custom Token**, not an ID token.
 
-The `accessToken` from this response is:
-- Automatically saved to `{{auth_token}}` collection variable
-- Used for all subsequent authenticated requests
+### Step 3: Exchange Custom Token for ID Token (Client-Side) 🔄
 
-### Step 3: Use Auth Token for Protected Endpoints
+**This step MUST be done on the client using Firebase SDK.**
 
-Now you can use the `{{auth_token}}` for authenticated requests:
+For mobile apps, see the [Frontend Integration Guide](../../FRONTEND_INTEGRATION_GUIDE.md) for complete examples.
 
-```http
-GET http://localhost:8000/api/v1/me
-Authorization: Bearer {{auth_token}}
+**For Postman/Testing:** In development mode, you can use the custom token directly. In production, always exchange for ID token.
+
+### Step 4: Use ID Token for Protected Endpoints
+
+**Endpoint:** `GET /api/v1/me`
+
+**Headers:**
+```
+Authorization: Bearer <ID_TOKEN>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User profile retrieved successfully",
+  "data": {
+    "id": "user123",
+    "phone_number": "+264813442530",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "userType": "student",
+    "createdAt": "2025-01-01T00:00:00.000000",
+    "updatedAt": "2025-01-01T00:00:00.000000"
+  },
+  "timestamp": "2025-01-01T00:00:00.000000"
+}
 ```
 
 ## 📋 Public Endpoints (No Auth Required)
@@ -77,14 +111,17 @@ Authorization: Bearer {{auth_token}}
 These endpoints **DO NOT** require authentication:
 
 1. ✅ `POST /api/v1/registration` - Register user (send OTP)
-2. ✅ `POST /api/v1/verify-otp` - Verify OTP and login (GET TOKEN HERE!)
-3. ✅ `POST /api/v1/email-otp-request` - Request email OTP
-4. ✅ `PUT /api/v1/email-otp-verify` - Verify email OTP
-5. ✅ `POST /api/v1/create-account` - Create user account
+2. ✅ `POST /api/v1/verify-otp` - Verify OTP and get custom token
+3. ✅ `POST /api/v1/login` - Alias for verify-otp
+4. ✅ `POST /api/v1/email-otp-request` - Request email OTP
+5. ✅ `PUT /api/v1/email-otp-verify` - Verify email OTP
 6. ✅ `POST /api/v1/driver/send-otp` - Driver send OTP
-7. ✅ `POST /api/v1/driver/login` - Driver login (GET TOKEN HERE!)
-8. ✅ `POST /api/v1/driver/verify-otp` - Driver verify OTP
-9. ✅ `POST /api/v1/driver/create-account` - Create driver account
+7. ✅ `POST /api/v1/driver/verify-otp` - Driver verify OTP and get custom token
+8. ✅ `POST /api/v1/driver/login` - Alias for driver verify-otp
+9. ✅ `GET /health` - Health check
+10. ✅ `GET /test` - API test endpoint
+
+**Note:** `POST /api/v1/create-account` and `POST /api/v1/driver/create-account` **REQUIRE** authentication.
 
 ## 🔒 Protected Endpoints (Auth Required)
 
@@ -188,9 +225,9 @@ JWT_SECRET=your_secret_here
    - In Postman, click collection → Variables tab
    - Verify `auth_token` has a value
 3. Token might be expired:
-   - User tokens expire after 30 days
-   - Driver tokens expire after 7 days
-   - Re-run the login flow to get a new token
+   - ID tokens expire after 1 hour
+   - Use `/api/v1/refresh-token` endpoint to refresh expired tokens
+   - Or re-run the login flow to get a new token
 
 ### Where is the token stored?
 
@@ -201,11 +238,18 @@ The token is stored in:
 
 ## 📚 Related Documentation
 
-- [Detailed Postman Collection Guide](./DETAILED_POSTMAN_COLLECTION.md)
-- [API Documentation](./API_DOCUMENTATION.md)
-- [Newman Testing Guide](../testing/NEWMAN_POSTMAN_TESTING.md)
+- [Frontend Integration Guide](../../FRONTEND_INTEGRATION_GUIDE.md) - Complete mobile app integration examples
+- [Authentication Flow Guide](../../AUTHENTICATION_FLOW_GUIDE.md) - Step-by-step guide with code examples
+- [Authentication Flow Explained](../../AUTHENTICATION_FLOW_EXPLAINED.md) - Technical details
+- [API Documentation](../../API_DOCUMENTATION.md) - Full API reference
+- [How to Get Auth Token](../../HOW_TO_GET_AUTH_TOKEN.md) - Quick reference
 
 ---
 
-**Key Takeaway:** Registration is **PUBLIC** - you get the auth token **AFTER** verifying OTP in the login step!
+**Key Takeaways:**
+1. Registration is **PUBLIC** - no auth token required
+2. You get a **custom token** after verifying OTP
+3. **Exchange custom token for ID token** using Firebase SDK (mobile apps)
+4. Use **ID token** for all authenticated requests
+5. Tokens expire after 1 hour - use `/refresh-token` to refresh
 

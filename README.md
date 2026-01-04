@@ -222,6 +222,16 @@ See **[API_DOCUMENTATION.md](API_DOCUMENTATION.md)** for:
 - Error codes
 - Field descriptions
 
+### Frontend/Mobile App Integration
+
+See **[FRONTEND_INTEGRATION_GUIDE.md](FRONTEND_INTEGRATION_GUIDE.md)** for:
+- Complete integration examples (React Native, Flutter, iOS, Android, Web)
+- API client setup and configuration
+- Authentication flow with code examples
+- Error handling patterns
+- Token management and refresh
+- Best practices
+
 ### Postman Collection
 
 Import `postmancollection/Londa_Rides_API_Collection_Complete.postman_collection.json` into Postman for:
@@ -229,6 +239,7 @@ Import `postmancollection/Londa_Rides_API_Collection_Complete.postman_collection
 - Auto-saved authentication tokens
 - Environment variables
 - Test scripts
+- Updated request bodies matching current API schemas
 
 ---
 
@@ -264,7 +275,10 @@ Import `postmancollection/Londa_Rides_API_Collection_Complete.postman_collection
    - Exchange custom token for ID token using Firebase SDK (client-side)
    - Include ID token in requests: `Authorization: Bearer <id_token>`
 
-For detailed authentication flow, see [AUTHENTICATION_FLOW_EXPLAINED.md](AUTHENTICATION_FLOW_EXPLAINED.md).
+For detailed authentication flow, see:
+- [AUTHENTICATION_FLOW_EXPLAINED.md](AUTHENTICATION_FLOW_EXPLAINED.md) - Technical details
+- [AUTHENTICATION_FLOW_GUIDE.md](AUTHENTICATION_FLOW_GUIDE.md) - Step-by-step guide
+- [FRONTEND_INTEGRATION_GUIDE.md](FRONTEND_INTEGRATION_GUIDE.md) - Mobile app integration examples
 
 ---
 

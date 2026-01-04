@@ -93,15 +93,15 @@ class DriverSubscriptionService:
     async def update_subscription(
         self,
         driver_id: str,
-        subscription_id: str,
         request: UpdateDriverSubscriptionRequest
     ) -> Dict[str, Any]:
         """Update driver subscription settings"""
         try:
-            subscription = await self.repository.get_subscription_by_id(subscription_id)
+            # Get the driver's active subscription
+            subscription = await self.repository.get_subscription_by_driver(driver_id)
             
-            if not subscription or subscription["driverId"] != driver_id:
-                raise NotFoundError("Subscription not found")
+            if not subscription:
+                raise NotFoundError(f"No active subscription found for driver {driver_id}")
             
             updates = {}
             
@@ -119,12 +119,13 @@ class DriverSubscriptionService:
             if not updates:
                 return subscription
             
-            return await self.repository.update_subscription(subscription_id, updates)
+            # Update using the subscription ID from the retrieved subscription
+            return await self.repository.update_subscription(subscription["id"], updates)
             
         except (NotFoundError, ValidationError):
             raise
         except Exception as e:
-            logger.error(f"Error updating subscription: {str(e)}")
+            logger.error(f"Error updating subscription for driver {driver_id}: {str(e)}")
             raise
     
     async def process_payment(self, request: ProcessSubscriptionPaymentRequest) -> Dict[str, Any]:

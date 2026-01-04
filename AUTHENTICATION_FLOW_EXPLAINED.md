@@ -66,23 +66,73 @@ Body: {
   "message": "OTP verified successfully",
   "data": {
     "accessToken": "eyJhbGciOiJSUzI1NiIs...",
-    "user": { "id": "...", "phoneNumber": "...", ... }
-  }
+    "user": {
+      "id": "user123",
+      "phone_number": "+264813442530",
+      "email": null,
+      "name": null,
+      "userType": null,
+      "createdAt": "2025-01-01T00:00:00.000000",
+      "updatedAt": "2025-01-01T00:00:00.000000"
+    }
+  },
+  "timestamp": "2025-01-01T00:00:00.000000"
 }
 ```
 
-### Step 3: Create Account (Optional)
+**⚠️ Important:** The `accessToken` is a **Firebase Custom Token**. You must exchange it for an ID token using Firebase SDK before making authenticated requests.
+
+### Step 3: Exchange Custom Token for ID Token (Client-Side)
+
+**This step MUST be done on the client using Firebase SDK:**
+
+#### React Native Example
+```javascript
+import auth from '@react-native-firebase/auth';
+import * as SecureStore from 'expo-secure-store';
+
+const customToken = data.data.accessToken; // from Step 2
+const userCredential = await auth().signInWithCustomToken(customToken);
+const idToken = await userCredential.user.getIdToken();
+await SecureStore.setItemAsync('auth_token', idToken);
+```
+
+#### Flutter Example
+```dart
+import 'package:firebase_auth/firebase_auth.dart';
+
+final userCredential = await FirebaseAuth.instance.signInWithCustomToken(customToken);
+final idToken = await userCredential.user?.getIdToken();
+```
+
+#### iOS (Swift) Example
+```swift
+let userCredential = try await Auth.auth().signIn(withCustomToken: customToken)
+let idToken = try await userCredential.user.getIDToken()
+```
+
+#### Android (Kotlin) Example
+```kotlin
+val result = auth.signInWithCustomToken(customToken).await()
+val idToken = result.user?.getIdToken(false)?.await()?.token
+```
+
+### Step 4: Create Account (Optional)
 ```
 POST /api/v1/create-account
-Headers: { "Authorization": "Bearer <accessToken>" }
+Headers: { "Authorization": "Bearer <ID_TOKEN>" }
 Body: {
+  "phone_number": "+264813442530",
   "name": "John Doe",
   "email": "john@example.com",
   "userType": "student"
 }
 ```
+
+**Note:** `user_id` is automatically extracted from the authentication token. Do NOT include it in the request body.
+
 - Updates Firestore document with full details
-- Updates custom claims based on `userType` (student, parent, etc.)
+- Updates custom claims based on `userType` (student, worker, parent)
 - Returns updated user profile
 
 ---
@@ -122,19 +172,36 @@ Body: {
 ```json
 {
   "success": true,
-  "message": "Driver login successful",
+  "message": "OTP verified successfully",
   "data": {
     "accessToken": "eyJhbGciOiJSUzI1NiIs...",
-    "driver": { "id": "...", "phoneNumber": "...", ... }
-  }
+    "user": {
+      "id": "driver123",
+      "phone_number": "+264813442530",
+      "email": null,
+      "name": null,
+      "status": "offline",
+      "createdAt": "2025-01-01T00:00:00.000000",
+      "updatedAt": "2025-01-01T00:00:00.000000"
+    }
+  },
+  "timestamp": "2025-01-01T00:00:00.000000"
 }
 ```
 
-### Step 3: Create Driver Account (Optional)
+**⚠️ Important:** The `accessToken` is a **Firebase Custom Token**. Exchange it for an ID token using Firebase SDK (same process as user flow).
+
+### Step 3: Exchange Custom Token for ID Token (Client-Side)
+
+Same process as user flow - use Firebase SDK to exchange custom token for ID token.
+
+### Step 4: Create Driver Account (Optional)
 ```
 POST /api/v1/driver/create-account
-Headers: { "Authorization": "Bearer <accessToken>" }
+Headers: { "Authorization": "Bearer <ID_TOKEN>" }
 Body: {
+  "phone_number": "+264813442530",
+  "email": "driver@example.com",
   "name": "Driver Name",
   "license_number": "ABC123",
   "vehicle_model": "Toyota Corolla",
@@ -142,6 +209,9 @@ Body: {
   "vehicle_color": "White"
 }
 ```
+
+**Note:** `driver_id` is automatically extracted from the authentication token. Do NOT include it in the request body.
+
 - Updates Firestore driver document with full details
 - Returns updated driver profile
 
@@ -247,36 +317,61 @@ This ensures both systems are **always in sync**!
 
 ## 📱 Mobile App Implementation
 
-### User App
+### Complete Integration Examples
+
+For detailed mobile app integration examples, see the [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md) which includes:
+
+- **React Native** (JavaScript/TypeScript) - Complete API client with interceptors
+- **Flutter** (Dart) - Dio HTTP client setup with token management
+- **iOS** (Swift) - URLSession implementation with Keychain storage
+- **Android** (Kotlin) - Retrofit/OkHttp setup with EncryptedSharedPreferences
+- **Web** (JavaScript/TypeScript) - Axios client with localStorage
+
+### Quick Reference
+
+**User App Endpoints:**
 ```javascript
 // Base URL
 const API_BASE = "https://api.londarides.com/api/v1";
 
-// Authentication
-POST /api/v1/registration
-POST /api/v1/login
-POST /api/v1/create-account
+// Authentication (Public)
+POST /api/v1/registration          // Send OTP
+POST /api/v1/verify-otp             // Verify OTP, get custom token
+POST /api/v1/login                  // Alias for verify-otp
+POST /api/v1/refresh-token          // Refresh expired token
 
-// Protected endpoints
-GET /api/v1/me
-POST /api/v1/request-ride
-GET /api/v1/get-rides
+// Account Management (Protected)
+POST /api/v1/create-account         // Create account (requires ID token)
+GET /api/v1/me                      // Get profile
+PUT /api/v1/update-profile          // Update profile
+
+// Rides (Protected)
+POST /api/v1/request-ride           // Request a ride
+GET /api/v1/get-rides               // Get user's rides
+POST /api/v1/cancel-ride            // Cancel ride
+PUT /api/v1/rate-ride               // Rate completed ride
 ```
 
-### Driver App
+**Driver App Endpoints:**
 ```javascript
 // Base URL (same!)
 const API_BASE = "https://api.londarides.com/api/v1";
 
-// Authentication
-POST /api/v1/driver/send-otp
-POST /api/v1/driver/login
-POST /api/v1/driver/create-account
+// Authentication (Public)
+POST /api/v1/driver/send-otp        // Send OTP
+POST /api/v1/driver/verify-otp      // Verify OTP, get custom token
+POST /api/v1/driver/login           // Alias for verify-otp
 
-// Protected endpoints (driver-only)
-GET /api/v1/driver/me
-GET /api/v1/driver/available-rides
-POST /api/v1/driver/accept-ride
+// Account Management (Protected - Driver Only)
+POST /api/v1/driver/create-account  // Create driver account
+GET /api/v1/driver/me               // Get driver profile
+PUT /api/v1/driver/update-status    // Update status (online/offline/busy)
+
+// Rides (Protected - Driver Only)
+GET /api/v1/driver/available-rides // Get available rides
+POST /api/v1/driver/accept-ride    // Accept ride
+POST /api/v1/driver/start-ride      // Start ride
+POST /api/v1/driver/complete-ride   // Complete ride
 ```
 
 **Note:** Both apps use the **same API base URL**, just different endpoint paths!
@@ -297,9 +392,11 @@ POST /api/v1/driver/accept-ride
 - ✅ Token verification on every protected request
 
 ### 3. Token Types
-- **Custom Token**: Generated by backend, includes custom claims
+- **Custom Token**: Generated by backend, includes custom claims (`user_type: "user"` or `user_type: "driver"`)
 - **ID Token**: Generated by Firebase SDK after exchanging custom token
-- **Best Practice**: Mobile apps should exchange custom token for ID token using Firebase SDK
+- **Best Practice**: Mobile apps MUST exchange custom token for ID token using Firebase SDK before making authenticated requests
+- **Development**: Backend accepts custom tokens in development mode for testing convenience
+- **Production**: Always use ID tokens in production
 
 ### 4. Token Refresh
 - Works for both users and drivers

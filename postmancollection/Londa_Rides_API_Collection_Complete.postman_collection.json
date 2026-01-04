@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Londa Rides API - Complete Collection",
-    "description": "Complete API collection for Londa Rides CC with all endpoints, proper authentication, and request bodies.\n\n## Authentication:\n- Bearer Token authentication is configured at collection level\n- Public endpoints (registration, OTP) have auth disabled\n- Protected endpoints use {{auth_token}} variable\n\n## Getting Started:\n1. Register/Login to get auth_token\n2. Token is auto-saved to collection variable\n3. All protected endpoints will use the token automatically",
+    "description": "Complete API collection for Londa Rides CC with all endpoints, proper authentication, and request bodies.\n\n## Authentication:\n- Bearer Token authentication is configured at collection level\n- Public endpoints (registration, OTP) have auth disabled\n- Protected endpoints use {{auth_token}} variable\n- Note: accessToken from /verify-otp is a Firebase Custom Token\n- In development mode, custom tokens can be used directly\n- In production, exchange custom token for ID token using Firebase SDK\n\n## Getting Started:\n1. Register/Login to get auth_token (custom token)\n2. Token is auto-saved to collection variable\n3. All protected endpoints will use the token automatically\n4. For mobile apps, see Frontend Integration Guide for token exchange\n\n## Important Notes:\n- user_id and driver_id are automatically extracted from auth tokens\n- Do NOT include user_id or driver_id in request bodies\n- See API_DOCUMENTATION.md for complete endpoint details\n- See FRONTEND_INTEGRATION_GUIDE.md for mobile app integration",
     "version": "4.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -430,7 +430,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"pickup_location\": {\n    \"latitude\": -22.5700,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.5800,\n    \"longitude\": 17.0900,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"standard\",\n  \"estimated_fare\": 13.00,\n  \"passengerCount\": 1\n}"
+              "raw": "{\n  \"pickup_location\": {\n    \"latitude\": -22.5700,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.5800,\n    \"longitude\": 17.0900,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"standard\",\n  \"estimated_fare\": 13.00,\n  \"passengerCount\": 1\n}"
             },
             "url": {
               "raw": "{{api_base}}/request-ride",
@@ -479,7 +479,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"reason\": \"Changed my mind\"\n}"
+              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"reason\": \"Changed my mind\"\n}"
             },
             "url": {
               "raw": "{{api_base}}/cancel-ride",
@@ -501,7 +501,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"rating\": 5,\n  \"review\": \"Great ride!\"\n}"
+              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"rating\": 5,\n  \"review\": \"Great ride!\"\n}"
             },
             "url": {
               "raw": "{{api_base}}/rate-ride",
@@ -893,7 +893,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"driver_id\": \"{{driver_id}}\",\n  \"payment_method\": \"cash\"\n}"
+              "raw": "{\n  \"payment_method\": \"cash\"\n}"
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription",
@@ -963,7 +963,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"driver_id\": \"{{driver_id}}\",\n  \"payment_method\": \"cash\",\n  \"amount\": 150.00\n}"
+              "raw": "{\n  \"payment_method\": \"cash\",\n  \"amount\": 150.00\n}"
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription/payment",
@@ -1013,7 +1013,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"payment_method\": \"cash\",\n  \"children_profiles\": [\n    {\n      \"child_name\": \"John Doe\",\n      \"child_age\": 10,\n      \"school_name\": \"Windhoek Primary School\",\n      \"pickup_address\": \"123 Main St, Windhoek\",\n      \"dropoff_address\": \"456 School Rd, Windhoek\",\n      \"emergency_contact\": {\n        \"name\": \"Jane Doe\",\n        \"phone\": \"+264813442530\"\n      }\n    }\n  ]\n}"
+              "raw": "{\n  \"payment_method\": \"cash\",\n  \"children_profiles\": [\n    {\n      \"child_name\": \"John Doe\",\n      \"child_age\": 10,\n      \"school_name\": \"Windhoek Primary School\",\n      \"pickup_address\": \"123 Main St, Windhoek\",\n      \"dropoff_address\": \"456 School Rd, Windhoek\",\n      \"emergency_contact\": {\n        \"name\": \"Jane Doe\",\n        \"phone\": \"+264813442530\"\n      }\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{api_base}}/parent/subscribe",
@@ -1054,7 +1054,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"auto_renew\": true\n}"
+              "raw": "{\n  \"auto_renew\": true\n}"
             },
             "url": {
               "raw": "{{api_base}}/parent/subscription",
@@ -1076,7 +1076,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"reason\": \"No longer needed\"\n}"
+              "raw": "{\n  \"reason\": \"No longer needed\"\n}"
             },
             "url": {
               "raw": "{{api_base}}/parent/subscription",
@@ -1144,7 +1144,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"child_name\": \"Jane Doe\",\n  \"child_age\": 8,\n  \"school_name\": \"Windhoek Elementary\",\n  \"pickup_address\": \"123 Main St, Windhoek\",\n  \"dropoff_address\": \"789 School Ave, Windhoek\",\n  \"emergency_contact\": {\n    \"name\": \"John Doe\",\n    \"phone\": \"+264813442531\"\n  }\n}"
+              "raw": "{\n  \"child_name\": \"Jane Doe\",\n  \"child_age\": 8,\n  \"school_name\": \"Windhoek Elementary\",\n  \"pickup_address\": \"123 Main St, Windhoek\",\n  \"dropoff_address\": \"789 School Ave, Windhoek\",\n  \"emergency_contact\": {\n    \"name\": \"John Doe\",\n    \"phone\": \"+264813442531\"\n  }\n}"
             },
             "url": {
               "raw": "{{api_base}}/parent/children",
@@ -1193,7 +1193,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"amount\": 13.00,\n  \"payment_method\": \"cash\"\n}"
+              "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"amount\": 13.00,\n  \"payment_method\": \"cash\"\n}"
             },
             "url": {
               "raw": "{{api_base}}/payment/process",
