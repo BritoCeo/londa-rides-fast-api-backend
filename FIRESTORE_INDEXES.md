@@ -6,6 +6,8 @@
 - `rides` collection: `status` (ASC) + `createdAt` (DESC)
 - `subscription_payments` collection: `driverId` (ASC) + `createdAt` (DESC)
 - `payments` collection: `userId` (ASC) + `createdAt` (DESC)
+- `parent_subscriptions` collection: `userId` (ASC) + `status` (ASC)
+- `driver_subscriptions` collection: `driverId` (ASC) + `status` (ASC)
 
 **Quick Fix:** Click the direct links in the sections below to create them instantly, or use the Firebase CLI method.
 
@@ -143,6 +145,58 @@ Click this direct link to create the index automatically:
 
 ---
 
+### 6. Parent Subscriptions Collection - Active Subscription Query
+
+**Query:** Get active subscription for a user (filters by userId and status)
+
+**Fields:**
+- `userId` (Ascending)
+- `status` (Ascending)
+
+**Collection:** `parent_subscriptions`
+
+**API Endpoint:** Used by `GET /api/v1/parent/subscription`
+
+**Index Creation:**
+1. Go to Firebase Console → Firestore → Indexes
+2. Click "Create Index"
+3. Set:
+   - Collection ID: `parent_subscriptions`
+   - Fields:
+     - Field: `userId`, Order: Ascending
+     - Field: `status`, Order: Ascending
+4. Click "Create"
+
+**Or use the direct link from the error message** (when it appears in logs)
+
+---
+
+### 7. Driver Subscriptions Collection - Active Subscription Query
+
+**Query:** Get active subscription for a driver (filters by driverId and status)
+
+**Fields:**
+- `driverId` (Ascending)
+- `status` (Ascending)
+
+**Collection:** `driver_subscriptions`
+
+**API Endpoint:** Used by `GET /api/v1/driver/subscription`
+
+**Index Creation:**
+1. Go to Firebase Console → Firestore → Indexes
+2. Click "Create Index"
+3. Set:
+   - Collection ID: `driver_subscriptions`
+   - Fields:
+     - Field: `driverId`, Order: Ascending
+     - Field: `status`, Order: Ascending
+4. Click "Create"
+
+**Or use the direct link from the error message** (when it appears in logs)
+
+---
+
 ## Quick Index Creation
 
 ### Using Firebase Console
@@ -222,6 +276,8 @@ The query requires an index. You can create it here: https://...
 - [ ] `rides` - status (ASC) + createdAt (DESC)
 - [ ] `subscription_payments` - driverId (ASC) + createdAt (DESC)
 - [ ] `payments` - userId (ASC) + createdAt (DESC)
+- [ ] `parent_subscriptions` - userId (ASC) + status (ASC)
+- [ ] `driver_subscriptions` - driverId (ASC) + status (ASC)
 
 **Note:** Create these indexes in Firebase Console before using the corresponding endpoints.
 
