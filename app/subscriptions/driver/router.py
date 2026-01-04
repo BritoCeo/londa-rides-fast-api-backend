@@ -101,7 +101,13 @@ async def update_driver_subscription(
     """Update driver subscription settings"""
     try:
         current_driver_id = current_driver["uid"]
-        subscription = await service.update_subscription(current_driver_id, driver_id, request)
+        
+        # Authorization: drivers can only update their own subscription
+        if driver_id != current_driver_id:
+            from app.core.exceptions import ForbiddenError
+            raise ForbiddenError("You can only update your own subscription")
+        
+        subscription = await service.update_subscription(driver_id, request)
         
         return success_response(
             message="Subscription updated successfully",
