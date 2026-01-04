@@ -1,6 +1,7 @@
 """
 Driver Repository - Firestore Operations
 """
+import math
 from typing import Optional, Dict, Any
 from firebase_admin import firestore
 from app.core.firebase import get_firestore
@@ -163,28 +164,127 @@ class DriverRepository:
         radius_km: float = 5.0,
         limit: int = 10
     ) -> list[Dict[str, Any]]:
-        """Get nearby drivers (simplified - in production use geohash or similar)"""
+        """
+        Get nearby drivers within specified radius using Haversine distance calculation
+        
+        Args:
+            latitude: User's latitude
+            longitude: User's longitude
+            radius_km: Search radius in kilometers (default: 5.0)
+            limit: Maximum number of drivers to return (default: 10)
+            
+        Returns:
+            List of driver documents sorted by distance (closest first)
+        """
         try:
             # Get all online drivers
             # Use filter keyword argument (best practice - avoids deprecation warning)
-            query = self.db.collection(self.collection).where(filter=firestore.FieldFilter("status", "==", "online")).limit(limit)
+            query = self.db.collection(self.collection).where(
+                filter=firestore.FieldFilter("status", "==", "online")
+            )
             docs = query.stream()
             
-            drivers = []
-            for doc in docs:
-                driver_data = doc.to_dict()
-                if "location" in driver_data:
-                    # Calculate distance (simplified - in production use proper geospatial query)
-                    driver_lat = driver_data["location"].latitude
-                    driver_lng = driver_data["location"].longitude
-                    
-                    # Simple distance calculation (Haversine would be better)
-                    # For now, return all online drivers
-                    drivers.append(driver_data)
+            drivers_with_distance = []
+            drivers_without_location = 0
+            total_online_drivers = 0
             
-            return drivers
+            for doc in docs:
+                total_online_drivers += 1
+                driver_data = doc.to_dict()
+                
+                # Ensure "id" field is set from document ID
+                if driver_data and "id" not in driver_data:
+                    driver_data["id"] = doc.id
+                
+                # Check if driver has location data
+                if "location" not in driver_data or driver_data["location"] is None:
+                    drivers_without_location += 1
+                    logger.debug(f"Driver {doc.id} has no location data")
+                    continue
+                
+                try:
+                    # Extract driver coordinates
+                    driver_location = driver_data["location"]
+                    driver_lat = driver_location.latitude
+                    driver_lng = driver_location.longitude
+                    
+                    # Calculate distance using Haversine formula
+                    distance_km = self._haversine_distance(
+                        latitude, longitude, driver_lat, driver_lng
+                    )
+                    
+                    # Only include drivers within the specified radius
+                    if distance_km <= radius_km:
+                        # Add distance to driver data for sorting and client use
+                        driver_data["distance_km"] = round(distance_km, 2)
+                        drivers_with_distance.append(driver_data)
+                        
+                except AttributeError as e:
+                    # Location field exists but is not a valid GeoPoint
+                    logger.warning(f"Driver {doc.id} has invalid location data: {str(e)}")
+                    drivers_without_location += 1
+                    continue
+                except Exception as e:
+                    # Unexpected error processing this driver
+                    logger.error(f"Error processing driver {doc.id}: {str(e)}")
+                    continue
+            
+            # Sort drivers by distance (closest first)
+            drivers_with_distance.sort(key=lambda d: d.get("distance_km", float('inf')))
+            
+            # Apply limit after sorting
+            result = drivers_with_distance[:limit]
+            
+            # Log summary for debugging
+            logger.info(
+                f"Found {len(result)} drivers within {radius_km}km radius "
+                f"(out of {total_online_drivers} online drivers, "
+                f"{drivers_without_location} without valid location)"
+            )
+            
+            return result
             
         except Exception as e:
-            logger.error(f"Error getting nearby drivers: {str(e)}")
+            logger.error(f"Error getting nearby drivers: {str(e)}", exc_info=True)
             raise
+    
+    def _haversine_distance(
+        self,
+        lat1: float,
+        lon1: float,
+        lat2: float,
+        lon2: float
+    ) -> float:
+        """
+        Calculate distance between two points using Haversine formula
+        
+        Args:
+            lat1: Latitude of point 1
+            lon1: Longitude of point 1
+            lat2: Latitude of point 2
+            lon2: Longitude of point 2
+            
+        Returns:
+            Distance in kilometers
+        """
+        # Earth's radius in kilometers
+        R = 6371.0
+        
+        # Convert degrees to radians
+        lat1_rad = math.radians(lat1)
+        lat2_rad = math.radians(lat2)
+        delta_lat = math.radians(lat2 - lat1)
+        delta_lon = math.radians(lon2 - lon1)
+        
+        # Haversine formula
+        a = (
+            math.sin(delta_lat / 2) ** 2 +
+            math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
+        )
+        c = 2 * math.asin(math.sqrt(a))
+        
+        # Distance in kilometers
+        distance = R * c
+        
+        return distance
 

@@ -204,11 +204,15 @@ class DriverService:
     ) -> list[Dict[str, Any]]:
         """Get nearby drivers"""
         try:
-            return await self.repository.get_nearby_drivers(
+            drivers = await self.repository.get_nearby_drivers(
                 latitude=latitude,
                 longitude=longitude,
                 radius_km=radius_km
             )
+            
+            # Serialize each driver document to handle GeoPoint and timestamps
+            # Best Practice: Ensure all Firestore types are converted before API response
+            return [serialize_firestore_document(driver) for driver in drivers]
             
         except Exception as e:
             logger.error(f"Error getting nearby drivers: {str(e)}")

@@ -452,20 +452,151 @@
               "query": [
                 {
                   "key": "latitude",
-                  "value": "-22.5700"
+                  "value": "-22.5700",
+                  "description": "User's latitude (-90 to 90)"
                 },
                 {
                   "key": "longitude",
-                  "value": "17.0836"
+                  "value": "17.0836",
+                  "description": "User's longitude (-180 to 180)"
                 },
                 {
                   "key": "radius",
-                  "value": "5"
+                  "value": "5",
+                  "description": "Search radius in km (default: 5, max: 100)"
                 }
-              ]
+              ],
+              "description": "Finds available drivers near the user's location using Haversine distance calculation. Returns drivers within the specified radius, sorted by distance (closest first). Each driver includes a distance_km field showing exact distance from the search location."
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success - Drivers Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{api_base}}/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5",
+                  "host": ["{{api_base}}"],
+                  "path": ["nearby-drivers"],
+                  "query": [
+                    {
+                      "key": "latitude",
+                      "value": "-22.5700"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "17.0836"
+                    },
+                    {
+                      "key": "radius",
+                      "value": "5"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Nearby drivers retrieved successfully\",\n  \"data\": {\n    \"drivers\": [\n      {\n        \"id\": \"test_driver_1\",\n        \"name\": \"John Doe\",\n        \"phone_number\": \"+264811234567\",\n        \"email\": \"john.doe@example.com\",\n        \"status\": \"online\",\n        \"location\": {\n          \"latitude\": -22.5700,\n          \"longitude\": 17.0836\n        },\n        \"distance_km\": 0.52,\n        \"license_number\": \"DL123456\",\n        \"vehicle_model\": \"Toyota Corolla\",\n        \"vehicle_plate\": \"N12345W\",\n        \"vehicle_color\": \"Silver\",\n        \"createdAt\": \"2024-12-31T19:00:00.000000\",\n        \"updatedAt\": \"2024-12-31T19:00:00.000000\",\n        \"locationUpdatedAt\": \"2024-12-31T19:00:00.000000\"\n      },\n      {\n        \"id\": \"test_driver_2\",\n        \"name\": \"Jane Smith\",\n        \"phone_number\": \"+264811234568\",\n        \"email\": \"jane.smith@example.com\",\n        \"status\": \"online\",\n        \"location\": {\n          \"latitude\": -22.5650,\n          \"longitude\": 17.0800\n        },\n        \"distance_km\": 1.23,\n        \"license_number\": \"DL123457\",\n        \"vehicle_model\": \"Honda Civic\",\n        \"vehicle_plate\": \"N12346W\",\n        \"vehicle_color\": \"Blue\",\n        \"createdAt\": \"2024-12-31T19:00:00.000000\",\n        \"updatedAt\": \"2024-12-31T19:00:00.000000\",\n        \"locationUpdatedAt\": \"2024-12-31T19:00:00.000000\"\n      }\n    ],\n    \"count\": 2,\n    \"radius_km\": 5.0,\n    \"search_location\": {\n      \"latitude\": -22.5700,\n      \"longitude\": 17.0836\n    }\n  },\n  \"timestamp\": \"2024-12-31T19:00:00.000000\"\n}"
+            },
+            {
+              "name": "Success - No Drivers Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{api_base}}/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=1",
+                  "host": ["{{api_base}}"],
+                  "path": ["nearby-drivers"],
+                  "query": [
+                    {
+                      "key": "latitude",
+                      "value": "-22.5700"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "17.0836"
+                    },
+                    {
+                      "key": "radius",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"No drivers available within 1.0km radius\",\n  \"data\": {\n    \"drivers\": [],\n    \"count\": 0,\n    \"radius_km\": 1.0\n  },\n  \"timestamp\": \"2024-12-31T19:00:00.000000\"\n}"
+            },
+            {
+              "name": "Error - Invalid Coordinates",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{api_base}}/nearby-drivers?latitude=200&longitude=17.0836&radius=5",
+                  "host": ["{{api_base}}"],
+                  "path": ["nearby-drivers"],
+                  "query": [
+                    {
+                      "key": "latitude",
+                      "value": "200"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "17.0836"
+                    },
+                    {
+                      "key": "radius",
+                      "value": "5"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false,\n  \"message\": \"Invalid latitude. Must be between -90 and 90\",\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"details\": {}\n  },\n  \"timestamp\": \"2024-12-31T19:00:00.000000\"\n}"
+            }
+          ]
         },
         {
           "name": "Cancel Ride",

@@ -667,15 +667,15 @@ Authorization: Bearer <your_token>
 
 **Endpoint:** `GET /api/v1/nearby-drivers`  
 **Authentication:** Required (Bearer token)  
-**Description:** Finds available drivers near the user's location.
+**Description:** Finds available drivers near the user's location using Haversine distance calculation. Returns drivers within the specified radius, sorted by distance (closest first).
 
 #### Query Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `latitude` | float | Yes | User's latitude |
-| `longitude` | float | Yes | User's longitude |
-| `radius` | float | No | Search radius in km (default: 5) |
+| `latitude` | float | Yes | User's latitude (-90 to 90) |
+| `longitude` | float | Yes | User's longitude (-180 to 180) |
+| `radius` | float | No | Search radius in km (default: 5.0, max: 100) |
 
 #### Example Request
 
@@ -695,23 +695,91 @@ GET /api/v1/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5.0
         "id": "driver_123",
         "name": "John Driver",
         "phone_number": "+264812345678",
+        "email": "john.driver@example.com",
         "status": "online",
         "location": {
           "latitude": -22.5710,
           "longitude": 17.0840
         },
-        "vehicle": {
-          "model": "Toyota Corolla",
-          "plate": "ABC-123",
-          "color": "White"
-        }
+        "distance_km": 0.52,
+        "license_number": "DL123456",
+        "vehicle_model": "Toyota Corolla",
+        "vehicle_plate": "ABC-123",
+        "vehicle_color": "White",
+        "createdAt": "2024-12-31T19:00:00.000000",
+        "updatedAt": "2024-12-31T19:00:00.000000"
       }
     ],
-    "count": 1
+    "count": 1,
+    "radius_km": 5.0,
+    "search_location": {
+      "latitude": -22.5700,
+      "longitude": 17.0836
+    }
   },
   "timestamp": "2024-12-31T19:00:00.000000"
 }
 ```
+
+#### Response (200 OK - No Drivers Found)
+
+```json
+{
+  "success": true,
+  "message": "No drivers available within 5.0km radius",
+  "data": {
+    "drivers": [],
+    "count": 0,
+    "radius_km": 5.0
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `drivers` | array | List of nearby drivers sorted by distance |
+| `drivers[].distance_km` | float | Distance from search location in kilometers |
+| `drivers[].location` | object | Driver's current location (properly serialized) |
+| `drivers[].location.latitude` | float | Driver's latitude |
+| `drivers[].location.longitude` | float | Driver's longitude |
+| `count` | integer | Number of drivers found |
+| `radius_km` | float | Search radius used |
+| `search_location` | object | The location that was searched from |
+
+#### Error Responses
+
+**400 Bad Request - Invalid Coordinates:**
+```json
+{
+  "success": false,
+  "message": "Invalid latitude. Must be between -90 and 90",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:00:00.000000"
+}
+```
+
+#### Implementation Details
+
+- Uses **Haversine formula** for accurate distance calculation
+- Filters drivers by specified radius (only returns drivers within range)
+- Results are **sorted by distance** (closest driver first)
+- Each driver includes a `distance_km` field showing exact distance
+- Location data is properly serialized (no GeoPoint objects in response)
+- Only returns drivers with status "online"
+- Maximum radius is 100km
+
+#### Notes
+
+- Drivers without valid location data are excluded from results
+- Distance calculation accounts for Earth's curvature
+- Response includes search parameters for client-side validation
+- Empty results return success response with empty array (not an error)
 
 ---
 
