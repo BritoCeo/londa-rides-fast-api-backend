@@ -16,16 +16,15 @@ The collection uses the following variables that you need to set:
 
 ## 🔐 Authentication Flow
 
-### **1. Unified OTP Login**
+### **1. User Registration (Send OTP)**
 ```bash
-POST /api/v1/otp-login
+POST /api/v1/registration
 {
-  "phone_number": "+264813442539",
-  "userType": "user" // or "driver"
+  "phone_number": "+264813442539"
 }
 ```
 
-### **2. Verify OTP**
+### **2. Verify OTP & Login**
 ```bash
 # For Users
 POST /api/v1/verify-otp
@@ -44,14 +43,15 @@ POST /api/v1/driver/verify-otp
 }
 ```
 
+**⚠️ Important:** The response returns a Firebase Custom Token. Exchange it for an ID token using Firebase SDK before making authenticated requests.
+
 ### **3. Refresh Token (When Token Expires)**
 ```bash
 POST /api/v1/refresh-token
-{
-  "user_id": "GD7miVR4Nmep37g9vcUt",
-  "userType": "user" // or "driver"
-}
+Headers: Authorization: Bearer <expired_or_valid_token>
 ```
+
+**Note:** No request body needed - the user_id is extracted from the token.
 
 ## 📱 API Categories
 
@@ -79,12 +79,14 @@ POST /api/v1/refresh-token
 - **Rate Ride**: Rate a completed ride
 
 ### **5. Driver Subscription APIs**
-- **Create Driver Subscription**: Create monthly subscription
-- **Get Current Driver Subscription**: Get current subscription status
-- **Get Driver Subscription by ID**: Get specific subscription
-- **Update Driver Subscription**: Update subscription settings
-- **Process Subscription Payment**: Process payment for subscription
-- **Get Driver Subscription History**: Get subscription history
+- **Create Driver Subscription**: Create monthly subscription (driver_id from token)
+- **Get Current Driver Subscription**: Get current subscription status (driver_id from token)
+- **Get Driver Subscription by ID**: Get specific subscription (driver_id in path)
+- **Update Driver Subscription**: Update subscription settings (driver_id in path)
+- **Process Subscription Payment**: Process payment for subscription (driver_id from token)
+- **Get Driver Subscription History**: Get subscription history (driver_id in path)
+
+**⚠️ Security Note:** For POST endpoints, driver_id is automatically extracted from the Bearer token - do NOT include it in request bodies.
 
 ### **6. Payment APIs**
 - **Calculate Fare**: Calculate ride fare
@@ -137,15 +139,17 @@ POST /api/v1/refresh-token
 3. Test other ride-related APIs
 
 ### **Step 5: Test Driver Subscription**
-1. Call **Create Driver Subscription** with driver_id
-2. Test subscription management APIs
+1. Ensure you have a valid driver authentication token
+2. Call **Create Driver Subscription** (driver_id extracted from token automatically)
+3. Test subscription management APIs
+
+**Important:** Do NOT include driver_id in request bodies for subscription creation or payment processing.
 
 ## 📝 Request Examples
 
 ### **Request Ride Example**
 ```json
 {
-  "user_id": "GD7miVR4Nmep37g9vcUt",
   "pickup_location": {
     "latitude": -22.5609,
     "longitude": 17.0658,

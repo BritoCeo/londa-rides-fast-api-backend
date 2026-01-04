@@ -8,7 +8,7 @@ from datetime import datetime
 
 class CreateDriverSubscriptionRequest(BaseModel):
     """Create driver subscription"""
-    driver_id: str
+    driver_id: Optional[str] = None  # Automatically set from auth token in router
     payment_method: str = Field("cash", description="Payment method (cash only)")
 
 
@@ -21,14 +21,14 @@ class UpdateDriverSubscriptionRequest(BaseModel):
 
 class ProcessSubscriptionPaymentRequest(BaseModel):
     """Process subscription payment"""
-    driver_id: str
+    driver_id: Optional[str] = None  # Automatically set from auth token in router
     payment_method: str = Field("cash", description="Payment method (cash only)")
     amount: float = Field(150.00, description="Amount in NAD")
 
 
 class CancelDriverSubscriptionRequest(BaseModel):
     """Cancel driver subscription"""
-    driver_id: str
+    driver_id: Optional[str] = None  # Automatically set from auth token in router
     reason: Optional[str] = Field(None, description="Cancellation reason")
 
 

@@ -19,14 +19,22 @@ The Driver Subscription Management APIs handle the monthly subscription system f
 
 Creates a new driver subscription with payment processing.
 
+**Authentication:** Required (Bearer token - Driver)
+
+**⚠️ Security Note:** The `driver_id` is automatically extracted from the authentication token. Do NOT include it in the request body.
+
 #### Request Body
 ```json
 {
-  "driver_id": "string (required)",
-  "payment_method": "cash (required)",
-  "payment_token": "string (optional)"
+  "payment_method": "cash"
 }
 ```
+
+#### Request Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `payment_method` | string | Yes | Payment method (currently only "cash" is supported) |
 
 #### Response (201 Created)
 ```json
@@ -137,15 +145,24 @@ Updates driver subscription settings.
 
 Processes a payment for driver subscription.
 
+**Authentication:** Required (Bearer token - Driver)
+
+**⚠️ Security Note:** The `driver_id` is automatically extracted from the authentication token. Do NOT include it in the request body.
+
 #### Request Body
 ```json
 {
-  "driver_id": "string (required)",
-  "payment_method": "cash (required)",
-  "payment_token": "string (optional)",
+  "payment_method": "cash",
   "amount": 150.00
 }
 ```
+
+#### Request Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `payment_method` | string | Yes | Payment method (currently only "cash" is supported) |
+| `amount` | float | Yes | Amount in NAD (must be exactly 150.00) |
 
 #### Response (200 OK)
 ```json
@@ -222,15 +239,20 @@ Retrieves the subscription payment history for a driver.
 All endpoints require authentication. Include the bearer token in the Authorization header:
 
 ```
-Authorization: Bearer <your_jwt_token>
+Authorization: Bearer <your_firebase_id_token>
 ```
+
+**Important Notes:**
+- The `driver_id` is automatically extracted from the authentication token
+- Do NOT include `driver_id` in request bodies for protected endpoints
+- This prevents drivers from making requests on behalf of other drivers
+- For token generation, see the [Authentication Flow Guide](../AUTHENTICATION_FLOW_EXPLAINED.md)
 
 ## ✅ Validation Rules
 
 ### Create Driver Subscription
-- `driver_id`: Required, must be a valid driver ID
 - `payment_method`: Required, must be `cash`
-- `payment_token`: Optional, must be a string if provided
+- **Note:** `driver_id` is extracted from authentication token, not request body
 
 ### Update Driver Subscription
 - `auto_renew`: Optional, must be a boolean
@@ -238,10 +260,9 @@ Authorization: Bearer <your_jwt_token>
 - `notification_preferences`: Optional, must be an object
 
 ### Process Subscription Payment
-- `driver_id`: Required, must be a valid driver ID
 - `payment_method`: Required, must be `cash`
-- `payment_token`: Optional, must be a string if provided
 - `amount`: Required, must be exactly 150.00
+- **Note:** `driver_id` is extracted from authentication token, not request body
 
 ## 🚨 Error Responses
 

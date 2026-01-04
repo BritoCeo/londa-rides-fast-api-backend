@@ -91,6 +91,49 @@ The `.env` file includes:
 - `DEBUG` - Set to `False` for production
 - `BACKEND_CORS_ORIGINS` - Add your frontend URLs
 
+## 🔐 Quick API Usage Examples
+
+### User Registration & Authentication
+
+```bash
+# 1. Send OTP
+curl -X POST http://localhost:8000/api/v1/registration \
+  -H "Content-Type: application/json" \
+  -d '{"phone_number": "+264813442530"}'
+
+# 2. Verify OTP & Get Token
+curl -X POST http://localhost:8000/api/v1/verify-otp \
+  -H "Content-Type: application/json" \
+  -d '{"phone_number": "+264813442530", "otp": "123456", "sessionInfo": "session_xxx"}'
+
+# 3. Create Account (with token)
+curl -X POST http://localhost:8000/api/v1/create-account \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ID_TOKEN" \
+  -d '{"phone_number": "+264813442530", "name": "John Doe", "userType": "student"}'
+```
+
+### Driver Subscription (No driver_id in body!)
+
+```bash
+# Create subscription - driver_id extracted from token
+curl -X POST http://localhost:8000/api/v1/driver/subscription \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_DRIVER_TOKEN" \
+  -d '{"payment_method": "cash"}'
+
+# Process payment - driver_id extracted from token
+curl -X POST http://localhost:8000/api/v1/driver/subscription/payment \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_DRIVER_TOKEN" \
+  -d '{"payment_method": "cash", "amount": 150.00}'
+```
+
+**⚠️ Important:** 
+- `user_id` and `driver_id` are automatically extracted from authentication tokens
+- Do NOT include them in request bodies
+- See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete API reference
+
 ## 📚 Full Documentation
 
 See `SETUP_DEV_ENV.md` for detailed setup instructions.

@@ -1756,6 +1756,83 @@ GET /api/v1/driver/subscription/history/driver_123?page=1&limit=10
 
 ---
 
+### 7.7 Cancel Driver Subscription
+
+**Endpoint:** `DELETE /api/v1/driver/subscription/{driver_id}`  
+**Authentication:** Required (Bearer token - Driver)  
+**Description:** Cancels a driver's active subscription. Drivers can only cancel their own subscription.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `driver_id` | string | Yes | Driver ID (must match authenticated driver) |
+
+#### Request Body
+
+```json
+{
+  "reason": "No longer driving for Londa Rides"
+}
+```
+
+#### Request Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `reason` | string | No | Cancellation reason |
+
+#### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Subscription cancelled successfully",
+  "data": {
+    "id": "sub_123456789",
+    "driverId": "driver_123",
+    "status": "cancelled",
+    "amount": 150.00,
+    "paymentMethod": "cash",
+    "startDate": "2024-12-31T19:00:00.000000",
+    "endDate": "2025-01-30T19:00:00.000000",
+    "cancellationReason": "No longer driving for Londa Rides",
+    "updatedAt": "2024-12-31T19:10:00.000000"
+  },
+  "timestamp": "2024-12-31T19:10:00.000000"
+}
+```
+
+#### Error Responses
+
+**403 Forbidden - Unauthorized Access:**
+```json
+{
+  "success": false,
+  "message": "You can only cancel your own subscription",
+  "error": {
+    "code": "FORBIDDEN",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:10:00.000000"
+}
+```
+
+**404 Not Found - No Active Subscription:**
+```json
+{
+  "success": false,
+  "message": "No active subscription found for driver driver_123",
+  "error": {
+    "code": "NOT_FOUND",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:10:00.000000"
+}
+```
+
+---
+
 ## 8. Parent Subscription APIs
 
 ### 8.1 Subscribe to Parent Package
@@ -2329,7 +2406,7 @@ GET /api/v1/payment/history?page=1&limit=10
 
 **Endpoint:** `GET /api/v1/driver/analytics/earnings`  
 **Authentication:** Required (Bearer token - Driver)  
-**Description:** Gets earnings analytics for the logged-in driver.
+**Description:** Gets earnings analytics for the logged-in driver with daily, weekly, and monthly breakdowns.
 
 #### Response (200 OK)
 
@@ -2339,15 +2416,117 @@ GET /api/v1/payment/history?page=1&limit=10
   "message": "Driver earnings retrieved successfully",
   "data": {
     "totalEarnings": 3250.00,
-    "thisMonth": 650.00,
-    "thisWeek": 195.00,
-    "today": 26.00,
     "totalRides": 250,
-    "averageEarningPerRide": 13.00
+    "averageEarningPerRide": 13.00,
+    "currency": "NAD",
+    "daily": {
+      "total": 26.00,
+      "rides": 2,
+      "breakdown": [
+        {
+          "date": "2025-01-04",
+          "earnings": 26.00,
+          "rides": 2
+        }
+      ]
+    },
+    "weekly": {
+      "total": 195.00,
+      "rides": 15,
+      "breakdown": [
+        {
+          "date": "2025-01-04",
+          "earnings": 26.00,
+          "rides": 2
+        },
+        {
+          "date": "2025-01-03",
+          "earnings": 39.00,
+          "rides": 3
+        },
+        {
+          "date": "2025-01-02",
+          "earnings": 52.00,
+          "rides": 4
+        },
+        {
+          "date": "2025-01-01",
+          "earnings": 39.00,
+          "rides": 3
+        },
+        {
+          "date": "2024-12-31",
+          "earnings": 26.00,
+          "rides": 2
+        },
+        {
+          "date": "2024-12-30",
+          "earnings": 13.00,
+          "rides": 1
+        }
+      ]
+    },
+    "monthly": {
+      "total": 650.00,
+      "rides": 50,
+      "breakdown": [
+        {
+          "date": "2025-01-04",
+          "earnings": 26.00,
+          "rides": 2
+        },
+        {
+          "date": "2025-01-03",
+          "earnings": 39.00,
+          "rides": 3
+        },
+        {
+          "date": "2025-01-02",
+          "earnings": 52.00,
+          "rides": 4
+        }
+      ]
+    }
   },
-  "timestamp": "2024-12-31T19:00:00.000000"
+  "timestamp": "2025-01-04T19:00:00.000000"
 }
 ```
+
+#### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `totalEarnings` | float | Total earnings from all completed rides (NAD) |
+| `totalRides` | integer | Total number of completed rides |
+| `averageEarningPerRide` | float | Average earning per ride (NAD) |
+| `currency` | string | Currency code (NAD) |
+| `daily` | object | Today's earnings summary and breakdown |
+| `daily.total` | float | Total earnings for today (NAD) |
+| `daily.rides` | integer | Number of rides completed today |
+| `daily.breakdown` | array | Daily breakdown (single day) |
+| `weekly` | object | Last 7 days earnings summary and breakdown |
+| `weekly.total` | float | Total earnings for last 7 days (NAD) |
+| `weekly.rides` | integer | Number of rides completed in last 7 days |
+| `weekly.breakdown` | array | Daily breakdown for last 7 days |
+| `monthly` | object | Last 30 days earnings summary and breakdown |
+| `monthly.total` | float | Total earnings for last 30 days (NAD) |
+| `monthly.rides` | integer | Number of rides completed in last 30 days |
+| `monthly.breakdown` | array | Daily breakdown for last 30 days |
+
+**Breakdown Array Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `date` | string | Date in YYYY-MM-DD format |
+| `earnings` | float | Total earnings for that date (NAD) |
+| `rides` | integer | Number of rides completed on that date |
+
+**Notes:**
+- All breakdowns are sorted by date in descending order (most recent first)
+- Daily period includes rides from 00:00:00 UTC today
+- Weekly period includes rides from last 7 days
+- Monthly period includes rides from last 30 days
+- All monetary values are in NAD (Namibian Dollar)
 
 ---
 

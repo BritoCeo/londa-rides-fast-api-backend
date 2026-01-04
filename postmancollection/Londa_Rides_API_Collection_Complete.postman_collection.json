@@ -898,7 +898,8 @@
             "url": {
               "raw": "{{api_base}}/driver/subscription",
               "host": ["{{api_base}}"],
-              "path": ["driver", "subscription"]
+              "path": ["driver", "subscription"],
+              "description": "Creates a driver subscription. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
             }
           },
           "response": []
@@ -969,7 +970,8 @@
             "url": {
               "raw": "{{api_base}}/driver/subscription/payment",
               "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "payment"]
+              "path": ["driver", "subscription", "payment"],
+              "description": "Processes subscription payment. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
             }
           },
           "response": []
@@ -1015,7 +1017,7 @@
               "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
               "host": ["{{api_base}}"],
               "path": ["driver", "subscription", "{{driver_id}}"],
-              "description": "Cancels driver subscription. The driver_id in the path must match the authenticated driver's ID."
+              "description": "Cancels driver subscription. The driver_id in the path must match the authenticated driver's ID. The reason field is optional in the request body."
             }
           },
           "response": []
@@ -1314,7 +1316,36 @@
               "path": ["driver", "analytics", "earnings"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success - Driver Earnings with Daily/Weekly/Monthly Breakdown",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{driver_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{api_base}}/driver/analytics/earnings",
+                  "host": ["{{api_base}}"],
+                  "path": ["driver", "analytics", "earnings"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Driver earnings retrieved successfully\",\n  \"data\": {\n    \"totalEarnings\": 3250.00,\n    \"totalRides\": 250,\n    \"averageEarningPerRide\": 13.00,\n    \"currency\": \"NAD\",\n    \"daily\": {\n      \"total\": 26.00,\n      \"rides\": 2,\n      \"breakdown\": [\n        {\n          \"date\": \"2025-01-04\",\n          \"earnings\": 26.00,\n          \"rides\": 2\n        }\n      ]\n    },\n    \"weekly\": {\n      \"total\": 195.00,\n      \"rides\": 15,\n      \"breakdown\": [\n        {\n          \"date\": \"2025-01-04\",\n          \"earnings\": 26.00,\n          \"rides\": 2\n        },\n        {\n          \"date\": \"2025-01-03\",\n          \"earnings\": 39.00,\n          \"rides\": 3\n        },\n        {\n          \"date\": \"2025-01-02\",\n          \"earnings\": 52.00,\n          \"rides\": 4\n        },\n        {\n          \"date\": \"2025-01-01\",\n          \"earnings\": 39.00,\n          \"rides\": 3\n        },\n        {\n          \"date\": \"2024-12-31\",\n          \"earnings\": 26.00,\n          \"rides\": 2\n        },\n        {\n          \"date\": \"2024-12-30\",\n          \"earnings\": 13.00,\n          \"rides\": 1\n        }\n      ]\n    },\n    \"monthly\": {\n      \"total\": 650.00,\n      \"rides\": 50,\n      \"breakdown\": [\n        {\n          \"date\": \"2025-01-04\",\n          \"earnings\": 26.00,\n          \"rides\": 2\n        },\n        {\n          \"date\": \"2025-01-03\",\n          \"earnings\": 39.00,\n          \"rides\": 3\n        },\n        {\n          \"date\": \"2025-01-02\",\n          \"earnings\": 52.00,\n          \"rides\": 4\n        }\n      ]\n    }\n  },\n  \"timestamp\": \"2025-01-04T19:00:00.000000\"\n}"
+            }
+          ]
         },
         {
           "name": "Get Driver Ride Analytics",
