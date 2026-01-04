@@ -941,12 +941,13 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"auto_renew\": true,\n  \"payment_method\": \"cash\"\n}"
+              "raw": "{\n  \"auto_renew\": true,\n  \"payment_method\": \"cash\",\n  \"notification_preferences\": {\n    \"ride_requests\": true,\n    \"payments\": true\n  }\n}"
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
               "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "{{driver_id}}"]
+              "path": ["driver", "subscription", "{{driver_id}}"],
+              "description": "Updates driver subscription settings. The driver_id in the path must match the authenticated driver's ID."
             }
           },
           "response": []

@@ -1569,7 +1569,13 @@ GET /api/v1/driver/available-rides?limit=50
 
 **Endpoint:** `PUT /api/v1/driver/subscription/{driver_id}`  
 **Authentication:** Required (Bearer token - Driver)  
-**Description:** Updates driver subscription settings.
+**Description:** Updates driver subscription settings. Drivers can only update their own subscription.
+
+#### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `driver_id` | string | Yes | Driver ID (must match authenticated driver) |
 
 #### Request Body
 
@@ -1600,8 +1606,42 @@ GET /api/v1/driver/available-rides?limit=50
   "message": "Subscription updated successfully",
   "data": {
     "id": "sub_123456789",
+    "driverId": "driver_123",
+    "status": "active",
+    "amount": 150.00,
+    "paymentMethod": "cash",
+    "startDate": "2024-12-31T19:00:00.000000",
+    "endDate": "2025-01-30T19:00:00.000000",
     "autoRenew": true,
     "updatedAt": "2024-12-31T19:05:00.000000"
+  },
+  "timestamp": "2024-12-31T19:05:00.000000"
+}
+```
+
+#### Error Responses
+
+**403 Forbidden - Unauthorized Access:**
+```json
+{
+  "success": false,
+  "message": "You can only update your own subscription",
+  "error": {
+    "code": "FORBIDDEN",
+    "details": {}
+  },
+  "timestamp": "2024-12-31T19:05:00.000000"
+}
+```
+
+**404 Not Found - No Active Subscription:**
+```json
+{
+  "success": false,
+  "message": "No active subscription found for driver driver_123",
+  "error": {
+    "code": "NOT_FOUND",
+    "details": {}
   },
   "timestamp": "2024-12-31T19:05:00.000000"
 }
