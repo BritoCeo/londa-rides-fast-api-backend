@@ -996,6 +996,29 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Cancel Driver Subscription",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"No longer driving for Londa Rides\"\n}"
+            },
+            "url": {
+              "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
+              "host": ["{{api_base}}"],
+              "path": ["driver", "subscription", "{{driver_id}}"],
+              "description": "Cancels driver subscription. The driver_id in the path must match the authenticated driver's ID."
+            }
+          },
+          "response": []
         }
       ]
     },

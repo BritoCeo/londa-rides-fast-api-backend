@@ -26,6 +26,12 @@ class ProcessSubscriptionPaymentRequest(BaseModel):
     amount: float = Field(150.00, description="Amount in NAD")
 
 
+class CancelDriverSubscriptionRequest(BaseModel):
+    """Cancel driver subscription"""
+    driver_id: str
+    reason: Optional[str] = Field(None, description="Cancellation reason")
+
+
 class DriverSubscriptionResponse(BaseModel):
     """Driver subscription response"""
     id: str

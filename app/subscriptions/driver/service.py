@@ -11,7 +11,8 @@ from app.core.exceptions import ValidationError, NotFoundError, ConflictError
 from app.subscriptions.driver.schemas import (
     CreateDriverSubscriptionRequest,
     UpdateDriverSubscriptionRequest,
-    ProcessSubscriptionPaymentRequest
+    ProcessSubscriptionPaymentRequest,
+    CancelDriverSubscriptionRequest
 )
 
 
@@ -197,5 +198,32 @@ class DriverSubscriptionService:
             
         except Exception as e:
             logger.error(f"Error getting payment history: {str(e)}")
+            raise
+    
+    async def cancel_subscription(
+        self,
+        driver_id: str,
+        reason: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Cancel driver subscription"""
+        try:
+            # Get the driver's active subscription
+            subscription = await self.repository.get_subscription_by_driver(driver_id)
+            
+            if not subscription:
+                raise NotFoundError(f"No active subscription found for driver {driver_id}")
+            
+            # Update subscription status to cancelled
+            updates = {
+                "status": "cancelled",
+                "cancellationReason": reason
+            }
+            
+            return await self.repository.update_subscription(subscription["id"], updates)
+            
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error cancelling subscription for driver {driver_id}: {str(e)}")
             raise
 

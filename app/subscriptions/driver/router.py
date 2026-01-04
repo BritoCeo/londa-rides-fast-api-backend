@@ -8,7 +8,8 @@ from app.subscriptions.driver.service import DriverSubscriptionService
 from app.subscriptions.driver.schemas import (
     CreateDriverSubscriptionRequest,
     UpdateDriverSubscriptionRequest,
-    ProcessSubscriptionPaymentRequest
+    ProcessSubscriptionPaymentRequest,
+    CancelDriverSubscriptionRequest
 )
 from app.core.logging import logger
 
@@ -162,5 +163,32 @@ async def get_subscription_history(
         
     except Exception as e:
         logger.error(f"Get payment history error: {str(e)}")
+        raise
+
+
+@router.delete("/driver/subscription/{driver_id}", status_code=status.HTTP_200_OK)
+async def cancel_driver_subscription(
+    driver_id: str,
+    request: CancelDriverSubscriptionRequest,
+    current_driver: dict = Depends(get_current_driver)
+):
+    """Cancel driver subscription"""
+    try:
+        current_driver_id = current_driver["uid"]
+        
+        # Authorization: drivers can only cancel their own subscription
+        if driver_id != current_driver_id:
+            from app.core.exceptions import ForbiddenError
+            raise ForbiddenError("You can only cancel your own subscription")
+        
+        subscription = await service.cancel_subscription(driver_id, request.reason)
+        
+        return success_response(
+            message="Subscription cancelled successfully",
+            data=subscription
+        )
+        
+    except Exception as e:
+        logger.error(f"Cancel subscription error: {str(e)}")
         raise
 
