@@ -60,6 +60,16 @@
       "key": "session_info",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "child_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notification_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -237,14 +247,7 @@
           ],
           "request": {
             "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{auth_token}}",
-                  "type": "string"
-                }
-              ]
+              "type": "noauth"
             },
             "method": "POST",
             "header": [
@@ -309,14 +312,7 @@
           "name": "Verify Email OTP",
           "request": {
             "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{auth_token}}",
-                  "type": "string"
-                }
-              ]
+              "type": "noauth"
             },
             "method": "PUT",
             "header": [
@@ -2374,7 +2370,7 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{driver_token}}",
+                    "value": "Bearer {{auth_token}}",
                     "type": "text"
                   }
                 ],
@@ -2694,7 +2690,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2740,7 +2736,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2770,7 +2766,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2814,7 +2810,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2853,7 +2849,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2884,7 +2880,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2924,7 +2920,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2954,7 +2950,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -2984,7 +2980,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3028,7 +3024,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3066,7 +3062,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3097,7 +3093,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3133,7 +3129,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3173,7 +3169,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{auth_token}}",
                   "type": "string"
                 }
               ]
@@ -3190,16 +3186,11 @@
           "name": "Trigger SOS Alert",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/ride/{{ride_id}}/sos",
+              "raw": "{{api_base}}/ride/{{ride_id}}/sos",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "ride",
@@ -3232,16 +3223,11 @@
           "name": "Share Track Link",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/ride/{{ride_id}}/share-tracking",
+              "raw": "{{api_base}}/ride/{{ride_id}}/share-tracking",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "ride",
@@ -3274,16 +3260,11 @@
           "name": "Update Ride Stops",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/ride/{{ride_id}}/stops",
+              "raw": "{{api_base}}/ride/{{ride_id}}/stops",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "ride",
@@ -3316,16 +3297,11 @@
           "name": "Driver Route Optimization",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{driver_token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/driver/route-optimization",
+              "raw": "{{api_base}}/driver/route-optimization",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "driver",
@@ -3348,16 +3324,11 @@
           "name": "Get Vehicle Details",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{driver_token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/driver/vehicle",
+              "raw": "{{api_base}}/driver/vehicle",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "driver",
@@ -3380,16 +3351,11 @@
           "name": "Update Vehicle Details",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{driver_token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/driver/vehicle",
+              "raw": "{{api_base}}/driver/vehicle",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "driver",
@@ -3398,7 +3364,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2023,\n  \"color\": \"White\",\n  \"licensePlate\": \"N 1234 W\",\n  \"capacity\": 4\n}",
+              "raw": "{\n  \"vehicle_make\": \"Toyota\",\n  \"vehicle_model\": \"Corolla\",\n  \"vehicle_color\": \"White\",\n  \"vehicle_plate\": \"N12345W\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3421,16 +3387,11 @@
           "name": "Upload Document Metadata",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{driver_token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/driver/documents/metadata",
+              "raw": "{{api_base}}/driver/documents/metadata",
               "host": [
-                "{{baseUrl}}"
+                "{{api_base}}"
               ],
               "path": [
                 "driver",
@@ -3440,7 +3401,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"document_type\": \"driver_license\",\n  \"document_url\": \"https://res.cloudinary.com/test-url\"\n}",
+              "raw": "{\n  \"document_type\": \"drivers_license\",\n  \"document_url\": \"https://res.cloudinary.com/test-url\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

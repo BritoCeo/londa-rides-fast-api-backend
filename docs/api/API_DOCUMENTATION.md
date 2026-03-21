@@ -1,145 +1,135 @@
 # Londa Rides API Documentation
 
-## Base URL
+## Base URLs
 ```
-https://londa-rides-fast-api-backend.onrender.com/api/v1
+Development: http://localhost:8000/api/v1
+Production: https://londa-rides-fast-api-backend.onrender.com/api/v1
 ```
 
 ## Authentication
-All protected endpoints require a JWT token in the Authorization header:
+Most protected endpoints require a bearer token in the Authorization header:
 ```
 Authorization: Bearer <token>
 ```
 
-## Endpoints
+Notes:
+- Public endpoints include user OTP routes, driver OTP routes, and `POST /api/v1/admin/login`.
+- `verify-otp`, `login`, and `refresh-token` return `accessToken`. In the Firebase production flow this is a custom token that the client exchanges for an ID token.
+- Protected endpoints derive `user_id` or `driver_id` from the authenticated token unless a path or query parameter explicitly requires an id.
 
-### User Service
+## Current API Surface
 
-#### Create User
-```
-POST /users
-Content-Type: application/json
+### Health & Status
+- `GET /health`
+- `GET /test`
+- `GET /api/v1/health/`
+- `GET /api/v1/health/test`
 
+### User Authentication & Profile
+- `POST /api/v1/registration`
+- `POST /api/v1/verify-otp`
+- `POST /api/v1/login`
+- `POST /api/v1/email-otp-request`
+- `PUT /api/v1/email-otp-verify`
+- `POST /api/v1/create-account`
+- `GET /api/v1/me`
+- `PUT /api/v1/update-profile`
+- `POST /api/v1/update-location`
+- `POST /api/v1/refresh-token`
+
+### User Ride Management
+- `POST /api/v1/request-ride`
+- `POST /api/v1/cancel-ride`
+- `PUT /api/v1/rate-ride`
+- `GET /api/v1/ride-status/{ride_id}`
+- `GET /api/v1/get-rides`
+- `GET /api/v1/nearby-drivers`
+- `GET /api/v1/rides/{ride_id}/messages`
+- `GET /api/v1/parent/active-rides`
+- `POST /api/v1/rides/schedule`
+- `GET /api/v1/rides/scheduled`
+- `PUT /api/v1/rides/scheduled/{ride_id}`
+- `DELETE /api/v1/rides/scheduled/{ride_id}`
+- `GET /api/v1/rides/carpool-matches`
+- `POST /api/v1/rides/join-carpool`
+- `POST /api/v1/ride/{ride_id}/sos`
+- `POST /api/v1/ride/{ride_id}/share-tracking`
+- `PUT /api/v1/ride/{ride_id}/stops`
+
+### Driver Authentication & Profile
+- `POST /api/v1/driver/send-otp`
+- `POST /api/v1/driver/verify-otp`
+- `POST /api/v1/driver/login`
+- `POST /api/v1/driver/create-account`
+- `GET /api/v1/driver/me`
+- `PUT /api/v1/driver/update-status`
+- `POST /api/v1/driver/update-location`
+- `POST /api/v1/driver/documents`
+- `GET /api/v1/driver/documents/status`
+- `GET /api/v1/driver/vehicle`
+- `PUT /api/v1/driver/vehicle`
+- `POST /api/v1/driver/documents/metadata`
+
+### Driver Ride Management
+- `GET /api/v1/driver/available-rides`
+- `POST /api/v1/driver/accept-ride`
+- `POST /api/v1/driver/decline-ride`
+- `POST /api/v1/driver/start-ride`
+- `POST /api/v1/driver/complete-ride`
+- `GET /api/v1/driver/get-rides`
+- `POST /api/v1/rides/{ride_id}/messages`
+- `POST /api/v1/driver/report-breakdown`
+- `GET /api/v1/driver/route-optimization`
+
+### Platform Features
+- Driver subscriptions: create, read, update, delete, payment, and history under `/api/v1/driver/subscription...`
+- Parent subscriptions: create, read, update, cancel, usage, and child management under `/api/v1/parent/...`
+- Payments: `/api/v1/payment/calculate-fare`, `/api/v1/payment/process`, `/api/v1/payment/history`, `/api/v1/subscribe-monthly`
+- Analytics: `/api/v1/analytics/...` and `/api/v1/driver/analytics/...`
+- Notifications: `/api/v1/notifications/register-device`, `/api/v1/notifications`, `/api/v1/notifications/{notification_id}/read`
+- Admin: `/api/v1/admin/login`, `/api/v1/admin/users`, `/api/v1/admin/drivers`, `/api/v1/admin/drivers/{driver_id}/status`, `/api/v1/admin/rides`, `/api/v1/admin/reports/financial`
+
+## Request Examples
+
+### Create User Account
+```json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phoneNumber": "+1234567890",
-  "userType": "STUDENT"
+  "phone_number": "+264813442530",
+  "email": "user@example.com",
+  "name": "Test User",
+  "userType": "student"
 }
 ```
 
-#### Get User by ID
-```
-GET /users/:id
-```
-
-#### Update User
-```
-PUT /users/:id
-Content-Type: application/json
-
+### Create Driver Account
+```json
 {
-  "name": "John Updated",
-  "email": "john.updated@example.com"
-}
-```
-
-### Driver Service
-
-#### Create Driver
-```
-POST /drivers
-Content-Type: application/json
-
-{
-  "name": "Driver Name",
-  "phoneNumber": "+1234567890",
+  "phone_number": "+264813442530",
   "email": "driver@example.com",
-  "vehicleType": "Car",
-  "registrationNumber": "ABC123"
+  "name": "Test Driver",
+  "license_number": "DL-12345",
+  "vehicle_model": "Toyota Corolla",
+  "vehicle_plate": "N12345W",
+  "vehicle_color": "White"
 }
 ```
 
-### Auth Service
-
-#### Login
-```
-POST /auth/login
-Content-Type: application/json
-
-{
-  "phoneNumber": "+1234567890",
-  "password": "password123",
-  "type": "user"
-}
-```
-
-#### Refresh Token
-```
-POST /auth/refresh
-Content-Type: application/json
-
-{
-  "refreshToken": "<refresh_token>"
-}
-```
-
-### Ride Service
-
-#### Request Ride
-```
-POST /request-ride
-Content-Type: application/json
-
+### Request Ride
+```json
 {
   "pickup_location": {
-    "latitude": -22.5700,
-    "longitude": 17.0836,
-    "name": "Pickup Address"
+    "latitude": -22.5609,
+    "longitude": 17.0658,
+    "name": "Windhoek Central"
   },
   "dropoff_location": {
-    "latitude": -22.5800,
-    "longitude": 17.0900,
-    "name": "Dropoff Address"
+    "latitude": -22.5709,
+    "longitude": 17.0758,
+    "name": "University of Namibia"
   },
-  "ride_type": "school",
-  "estimated_fare": 13.00,
+  "ride_type": "standard",
+  "estimated_fare": 13.0,
   "passengerCount": 1
-}
-```
-
-#### Get Active Rides
-Retrieves active rides for the authenticated parent. Can optionally filter by ride type.
-```
-GET /parent/active-rides?ride_type=school
-```
-
-#### Send Ride Message
-Allows drivers to send messages during an active ride.
-```
-POST /rides/:ride_id/messages
-Content-Type: application/json
-
-{
-  "content": "I have arrived at the school.",
-  "message_type": "text"
-}
-```
-
-#### Get Ride Messages
-Retrieves the message history for a specific ride.
-```
-GET /rides/:ride_id/messages?limit=50
-```
-
-#### Report Breakdown (Driver)
-Allows a driver to report a vehicle breakdown, resetting the ride back to pending and notifying nearby drivers.
-```
-POST /driver/report-breakdown
-Content-Type: application/json
-
-{
-  "ride_id": "ride-uuid-here"
 }
 ```
 
@@ -150,7 +140,7 @@ Content-Type: application/json
 {
   "success": true,
   "message": "Operation successful",
-  "data": { ... },
+  "data": {},
   "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
@@ -160,13 +150,13 @@ Content-Type: application/json
 {
   "success": false,
   "message": "Error message",
-  "code": "ERROR_CODE",
-  "details": { ... },
+  "error": {
+    "code": "ERROR_CODE",
+    "details": {}
+  },
   "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
-
-
 
 ---
 
@@ -219,10 +209,10 @@ Content-Type: application/json
 - **Body:**
   ```json
   {
-    "make": "Toyota", 
-    "model": "Corolla", 
-    "license_plate": "N12345W", 
-    "color": "White"
+    "vehicle_make": "Toyota",
+    "vehicle_model": "Corolla",
+    "vehicle_plate": "N12345W",
+    "vehicle_color": "White"
   }
   ```
 
