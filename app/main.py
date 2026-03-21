@@ -2,9 +2,11 @@
 FastAPI Main Application
 """
 import os
+import time
+import json
 import asyncio
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.config import settings
@@ -78,6 +80,88 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+@app.middleware("http")
+async def log_requests_and_responses(request: Request, call_next):
+    """Middleware to log all requests and responses for debugging on Render"""
+    # Skip logging for health endpoints to avoid log spam
+    skip_paths = ["/health", "/", "/health/", f"{settings.API_V1_STR}/health", f"{settings.API_V1_STR}/health/"]
+    if request.url.path in skip_paths:
+        return await call_next(request)
+        
+    start_time = time.time()
+    
+    # Extract request body
+    req_body_str = None
+    try:
+        body_bytes = await request.body()
+        if body_bytes:
+            req_body_str = body_bytes.decode("utf-8")
+            # Try to parse as JSON for cleaner logging if possible
+            try:
+                # We just verify it's JSON, but log as string or parsed object
+                json.loads(req_body_str)
+            except json.JSONDecodeError:
+                pass
+                
+        # Reset the request body so endpoints can read it
+        async def receive():
+            return {"type": "http.request", "body": body_bytes}
+        request._receive = receive
+    except Exception as e:
+        logger.error(f"Error reading request body: {str(e)}")
+
+    req_details = {
+        "method": request.method,
+        "path": request.url.path,
+        "query": request.url.query,
+    }
+    if req_body_str:
+        req_details["body"] = req_body_str
+
+    # Log incoming request
+    logger.info(f"API Request: {request.method} {request.url.path}", extra={"extra": {"request": req_details}})
+
+    # Process the request
+    response = await call_next(request)
+    
+    # Calculate process time
+    process_time = (time.time() - start_time) * 1000
+    
+    # Extract response body
+    res_body_str = None
+    try:
+        if hasattr(response, "body_iterator"):
+            res_body_bytes = b""
+            async for chunk in response.body_iterator:
+                res_body_bytes += chunk
+            
+            # Reset the body iterator so the client gets the response
+            async def new_body_iterator():
+                yield res_body_bytes
+            response.body_iterator = new_body_iterator()
+            
+            res_body_str = res_body_bytes.decode("utf-8")
+            # Truncate very long responses
+            if len(res_body_str) > 2000:
+                res_body_str = res_body_str[:2000] + "... [truncated]"
+    except Exception as e:
+        logger.error(f"Error reading response body: {str(e)}")
+        
+    res_details = {
+        "status_code": response.status_code,
+        "process_time_ms": round(process_time, 2)
+    }
+    if res_body_str:
+        res_details["body"] = res_body_str
+        
+    # Log outgoing response
+    logger.info(
+        f"API Response: {request.method} {request.url.path} - Status: {response.status_code}", 
+        extra={"extra": {"response": res_details}}
+    )
+    
+    return response
 
 # Setup CORS middleware
 if settings.BACKEND_CORS_ORIGINS:
