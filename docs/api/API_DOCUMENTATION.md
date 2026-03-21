@@ -166,3 +166,120 @@ Content-Type: application/json
 }
 ```
 
+
+
+---
+
+## Admin Dashboard
+
+### 1. Admin Login
+**POST** `/api/v1/admin/login`
+- **Description:** Authenticate admin dashboard access.
+- **Body:**
+  ```json
+  { "id_token": "YOUR_FIREBASE_ID_TOKEN" }
+  ```
+
+### 2. Get Users / Drivers / Rides
+**GET** `/api/v1/admin/users`
+**GET** `/api/v1/admin/drivers`
+**GET** `/api/v1/admin/rides`
+- **Description:** Fetch platform entities for monitoring. Requires Admin Claims.
+
+### 3. Update Vetting Status
+**PUT** `/api/v1/admin/drivers/{driver_id}/status`
+- **Description:** Approve entirely vetted drivers or suspend them.
+- **Body:**
+  ```json
+  {
+    "status": "approved",
+    "reason": "Docs verified"
+  }
+  ```
+
+### 4. Financial Reports
+**GET** `/api/v1/admin/reports/financial`
+- **Description:** Aggregated financial reporting matching SRS tracking for parent packages vs driver revenue.
+
+---
+
+## Driver Vetting and Compliance
+
+### 1. Upload Document
+**POST** `/api/v1/driver/documents`
+- **Description:** Upload a multipart form-data document. Must provide `file` and `document_type` (license, permit).
+
+### 2. Vetting Status
+**GET** `/api/v1/driver/documents/status`
+- **Description:** View pending, approved, or rejected document statuses.
+
+### 3. Update Vehicle
+**PUT** `/api/v1/driver/vehicle`
+- **Description:** Manage/update vehicle details.
+- **Body:**
+  ```json
+  {
+    "make": "Toyota", 
+    "model": "Corolla", 
+    "license_plate": "N12345W", 
+    "color": "White"
+  }
+  ```
+
+---
+
+## Advanced Ride Scheduling & Carpooling
+
+### 1. Schedule a Ride
+**POST** `/api/v1/rides/schedule`
+- **Description:** Book a future ride.
+- **Body:** Contains `scheduled_time` and `is_recurring`.
+
+### 2. Manage Scheduled Rides
+**GET** `/api/v1/rides/scheduled`
+**PUT** `/api/v1/rides/scheduled/{ride_id}`
+**DELETE** `/api/v1/rides/scheduled/{ride_id}`
+
+### 3. Carpooling
+**GET** `/api/v1/rides/carpool-matches`
+- **Query Params:** `lat`, `lng`, `dest_lat`, `dest_lng`, `time`
+- **Description:** Find existing trips a user could piggyback on.
+
+**POST** `/api/v1/rides/join-carpool`
+- **Description:** Join an existing carpool.
+- **Body:**
+  ```json
+  { "ride_id": "uuid", "passengerCount": 1 }
+  ```
+
+---
+
+## Secure Parent/Child Handoff Updates
+
+### 1. Update Child Profile
+**PUT** `/api/v1/parent/children/{child_id}`
+- **Description:** Update a child's profile details.
+
+### 2. Remove Child Profile
+**DELETE** `/api/v1/parent/children/{child_id}`
+- **Description:** Remove a child graduating or leaving the package.
+
+---
+
+## Notifications & Communications
+
+### 1. Register Device Token
+**POST** `/api/v1/notifications/register-device`
+- **Description:** Register a user's Firebase Cloud Messaging token.
+- **Body:**
+  ```json
+  { "token": "string", "device_type": "android|ios" }
+  ```
+
+### 2. Notification History
+**GET** `/api/v1/notifications`
+- **Description:** Fetch the user's notification history inbox.
+
+### 3. Mark Read
+**PUT** `/api/v1/notifications/{notification_id}/read`
+- **Description:** Acknowledge notification receipt.

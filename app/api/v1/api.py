@@ -11,11 +11,14 @@ from app.subscriptions.driver import router as driver_subscription_router
 from app.subscriptions.parent import router as parent_subscription_router
 from app.payments import router as payments_router
 from app.analytics import router as analytics_router
+from app.notifications import router as notifications_router
+from app.admin import router as admin_router
 
 api_router = APIRouter()
 
 # Include endpoint routers
 api_router.include_router(health.router, prefix="/health", tags=["health"])
+api_router.include_router(admin_router.router)
 api_router.include_router(users_router.router, tags=["users"])
 api_router.include_router(drivers_router.router, tags=["drivers"])
 api_router.include_router(rides_router.router, tags=["rides"])
@@ -24,4 +27,5 @@ api_router.include_router(driver_subscription_router.router, tags=["driver-subsc
 api_router.include_router(parent_subscription_router.router, tags=["parent-subscriptions"])
 api_router.include_router(payments_router.router, tags=["payments"])
 api_router.include_router(analytics_router.router, tags=["analytics"])
+api_router.include_router(notifications_router.router)
 
