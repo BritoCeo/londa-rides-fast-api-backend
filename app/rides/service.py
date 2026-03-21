@@ -228,3 +228,46 @@ class RideService:
         return await self.repository.get_active_rides(user_id, ride_type)
 
 
+
+    async def schedule_ride(self, user_id: str, request: Any) -> Dict[str, Any]:
+        """Schedule a future ride."""
+        ride_data = request.model_dump()
+        ride_data["userId"] = user_id
+        ride_data["status"] = "scheduled"
+        return await self.repository.create_scheduled_ride(ride_data)
+
+    async def get_scheduled_rides(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get scheduled rides for a user."""
+        return await self.repository.get_scheduled_rides(user_id)
+
+    async def update_scheduled_ride(self, user_id: str, ride_id: str, update_data: dict) -> Dict[str, Any]:
+        """Update a scheduled ride if the user owns it."""
+        ride = await self.repository.get_ride_by_id(ride_id)
+        if not ride or ride.get("userId") != user_id:
+            raise ConflictError("Not authorized to update this ride")
+        if ride.get("status") != "scheduled":
+            raise ConflictError("Only scheduled rides can be updated")
+            
+        return await self.repository.update_scheduled_ride(ride_id, update_data)
+
+    async def cancel_scheduled_ride(self, user_id: str, ride_id: str) -> bool:
+        """Cancel a scheduled ride."""
+        ride = await self.repository.get_ride_by_id(ride_id)
+        if not ride or ride.get("userId") != user_id:
+            raise ConflictError("Not authorized to cancel this ride")
+        
+        return await self.repository.delete_scheduled_ride(ride_id)
+
+    async def get_carpool_matches(self, lat: float, lng: float, dest_lat: float, dest_lng: float, time: str) -> List[Dict[str, Any]]:
+        """Find matching scheduled rides for carpool."""
+        return await self.repository.find_carpool_matches(lat, lng, dest_lat, dest_lng, time)
+
+    async def join_carpool(self, user_id: str, request: Any) -> Dict[str, Any]:
+        """Join an existing scheduled/active carpool."""
+        ride_id = request.ride_id
+        ride = await self.repository.get_ride_by_id(ride_id)
+        if not ride:
+            raise ConflictError("Ride not found")
+            
+        # Add logic to add user to carpool members and split fare
+        return await self.repository.add_carpool_member(ride_id, user_id, request.passengerCount)

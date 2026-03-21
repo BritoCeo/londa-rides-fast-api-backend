@@ -107,3 +107,15 @@ class ReportBreakdownRequest(BaseModel):
     """Driver reports a breakdown"""
     ride_id: str
 
+
+class ScheduleRideRequest(BaseModel):
+    pickup_location: Location
+    dropoff_location: Location
+    scheduled_time: datetime
+    is_recurring: bool = False
+    passengerCount: int = Field(1, ge=1, le=8)
+    estimated_fare: float = Field(13.00)
+
+class JoinCarpoolRequest(BaseModel):
+    ride_id: str
+    passengerCount: int = Field(1, ge=1, le=8)

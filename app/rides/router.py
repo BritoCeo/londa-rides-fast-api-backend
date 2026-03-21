@@ -259,3 +259,118 @@ async def get_parent_active_rides(
         raise
 
 
+
+from app.rides.schemas import ScheduleRideRequest, JoinCarpoolRequest
+import datetime
+
+@router.post("/rides/schedule", status_code=status.HTTP_201_CREATED)
+async def schedule_ride(
+    request: ScheduleRideRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Book a future ride."""
+    try:
+        user_id = current_user["uid"]
+        # Basic implementation
+        scheduled_ride = await service.schedule_ride(user_id, request)
+        
+        return success_response(
+            message="Ride scheduled successfully",
+            data=scheduled_ride,
+            status_code=201
+        )
+    except Exception as e:
+        logger.error(f"Schedule ride error: {str(e)}")
+        raise
+
+@router.get("/rides/scheduled", status_code=status.HTTP_200_OK)
+async def get_scheduled_rides(
+    current_user: dict = Depends(get_current_user)
+):
+    """Retrieve upcoming scheduled rides."""
+    try:
+        user_id = current_user["uid"]
+        rides = await service.get_scheduled_rides(user_id)
+        
+        return success_response(
+            message="Scheduled rides retrieved successfully",
+            data={"rides": rides, "count": len(rides)}
+        )
+    except Exception as e:
+        logger.error(f"Get scheduled rides error: {str(e)}")
+        raise
+
+@router.put("/rides/scheduled/{ride_id}", status_code=status.HTTP_200_OK)
+async def update_scheduled_ride(
+    ride_id: str,
+    update_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update scheduled ride."""
+    try:
+        user_id = current_user["uid"]
+        updated_ride = await service.update_scheduled_ride(user_id, ride_id, update_data)
+        
+        return success_response(
+            message="Scheduled ride updated successfully",
+            data=updated_ride
+        )
+    except Exception as e:
+        logger.error(f"Update scheduled ride error: {str(e)}")
+        raise
+
+@router.delete("/rides/scheduled/{ride_id}", status_code=status.HTTP_200_OK)
+async def cancel_scheduled_ride(
+    ride_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Cancel scheduled ride."""
+    try:
+        user_id = current_user["uid"]
+        await service.cancel_scheduled_ride(user_id, ride_id)
+        
+        return success_response(
+            message="Scheduled ride cancelled successfully"
+        )
+    except Exception as e:
+        logger.error(f"Cancel scheduled ride error: {str(e)}")
+        raise
+
+@router.get("/rides/carpool-matches", status_code=status.HTTP_200_OK)
+async def get_carpool_matches(
+    lat: float,
+    lng: float,
+    dest_lat: float,
+    dest_lng: float,
+    time: str = Query(..., description="ISO formated time"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Find scheduled trips that a user could piggy-back onto."""
+    try:
+        matches = await service.get_carpool_matches(lat, lng, dest_lat, dest_lng, time)
+        
+        return success_response(
+            message="Carpool matches retrieved successfully",
+            data={"matches": matches, "count": len(matches)}
+        )
+    except Exception as e:
+        logger.error(f"Get carpool matches error: {str(e)}")
+        raise
+
+@router.post("/rides/join-carpool", status_code=status.HTTP_200_OK)
+async def join_carpool(
+    request: JoinCarpoolRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Join an existing active/scheduled carpool ride."""
+    try:
+        user_id = current_user["uid"]
+        ride = await service.join_carpool(user_id, request)
+        
+        return success_response(
+            message="Joined carpool successfully",
+            data=ride
+        )
+    except Exception as e:
+        logger.error(f"Join carpool error: {str(e)}")
+        raise

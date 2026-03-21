@@ -515,3 +515,123 @@ class RideRepository:
             logger.error(f"Error resetting ride {ride_id} to pending: {str(e)}")
             raise
 
+
+    async def create_scheduled_ride(self, ride_data: dict) -> dict:
+        """Create a new scheduled ride in Firestore"""
+        try:
+            ride_id = str(uuid.uuid4())
+            ride_ref = self.db.collection(self.collection).document(ride_id)
+            
+            # Format data for Firestore
+            now = firestore.SERVER_TIMESTAMP
+            
+            doc_data = {
+                **ride_data,
+                "id": ride_id,
+                "createdAt": now,
+                "updatedAt": now,
+                "carpoolMembers": []
+            }
+            
+            # Add to Firestore
+            ride_ref.set(doc_data)
+            
+            # Get created document to return
+            doc = ride_ref.get()
+            return serialize_firestore_document(doc.to_dict()) if doc.exists else {}
+            
+        except Exception as e:
+            logger.error(f"Error creating scheduled ride: {str(e)}")
+            raise
+
+    async def get_scheduled_rides(self, user_id: str) -> list:
+        """Get all scheduled rides for a user"""
+        try:
+            query = (
+                self.db.collection(self.collection)
+                .where("userId", "==", user_id)
+                .where("status", "==", "scheduled")
+                .order_by("scheduled_time")
+            )
+            docs = query.stream()
+            return [serialize_firestore_document(doc.to_dict()) for doc in docs]
+        except Exception as e:
+            logger.error(f"Error getting scheduled rides for user {user_id}: {str(e)}")
+            raise
+
+    async def update_scheduled_ride(self, ride_id: str, update_data: dict) -> dict:
+        """Update a scheduled ride"""
+        try:
+            doc_ref = self.db.collection(self.collection).document(ride_id)
+            updates = {
+                **update_data,
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            }
+            doc_ref.update(updates)
+            
+            doc = doc_ref.get()
+            return serialize_firestore_document(doc.to_dict()) if doc.exists else {}
+        except Exception as e:
+            logger.error(f"Error updating scheduled ride {ride_id}: {str(e)}")
+            raise
+
+    async def delete_scheduled_ride(self, ride_id: str) -> bool:
+        """Cancel/delete a scheduled ride"""
+        try:
+            doc_ref = self.db.collection(self.collection).document(ride_id)
+            doc_ref.update({
+                "status": "cancelled",
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            })
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting scheduled ride {ride_id}: {str(e)}")
+            raise
+
+    async def find_carpool_matches(self, lat: float, lng: float, dest_lat: float, dest_lng: float, time: str) -> list:
+        """Find scheduled rides with available seats that overlap with route."""
+        try:
+            # Note: Geocoding logic is simplified, typically requires PostGIS or GeoFire
+            # We simply return all currently scheduled trips that have less than 4 passengers.
+            query = (
+                self.db.collection(self.collection)
+                .where("status", "==", "scheduled")
+                .where("passengerCount", "<", 4)
+            )
+            docs = query.stream()
+            matches = [serialize_firestore_document(doc.to_dict()) for doc in docs]
+            # Filter matches by time (pseudo-logic for now)
+            return matches
+        except Exception as e:
+            logger.error(f"Error finding carpool matches: {str(e)}")
+            raise
+
+    async def add_carpool_member(self, ride_id: str, user_id: str, passenger_count: int) -> dict:
+        """Add user to a carpool ride."""
+        try:
+            doc_ref = self.db.collection(self.collection).document(ride_id)
+            doc = doc_ref.get()
+            if not doc.exists:
+                raise Exception("Ride not found")
+                
+            data = doc.to_dict()
+            members = data.get("carpoolMembers", [])
+            members.append({
+                "userId": user_id,
+                "passengerCount": passenger_count
+            })
+            
+            current_passengers = data.get("passengerCount", 0)
+            
+            updates = {
+                "carpoolMembers": members,
+                "passengerCount": current_passengers + passenger_count,
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            }
+            doc_ref.update(updates)
+            
+            updated_doc = doc_ref.get()
+            return serialize_firestore_document(updated_doc.to_dict()) if updated_doc.exists else {}
+        except Exception as e:
+            logger.error(f"Error adding carpool member to ride {ride_id}: {str(e)}")
+            raise
