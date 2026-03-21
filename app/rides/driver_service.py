@@ -233,4 +233,56 @@ class DriverRideService:
             logger.error(f"Error reporting breakdown for ride {ride_id}: {str(e)}")
             raise
 
+    async def get_optimized_route(self, driver_id: str) -> Dict[str, Any]:
+        """Get an optimized route for driver's active rides"""
+        try:
+            from app.drivers.repository import DriverRepository
+            from app.maps.service import maps_service
+            
+            driver_repo = DriverRepository()
+            driver_profile = await driver_repo.get_driver_by_id(driver_id)
+            if not driver_profile or 'location' not in driver_profile:
+                raise ConflictError("Driver location not available")
+                
+            driver_lat = driver_profile['location'].get('latitude')
+            driver_lng = driver_profile['location'].get('longitude')
+            origin = (driver_lat, driver_lng)
+            
+            # Fetch driver rides
+            rides_res = await self.repository.get_driver_rides(driver_id, limit=50)
+            
+            # Filter active carpool/regular rides
+            active_rides = [r for r in rides_res.get('rides', []) if r.get('status') in ['accepted', 'started']]
+            if not active_rides:
+                return {"message": "No active rides to route", "route": None}
+                
+            points = []
+            for ride in active_rides:
+                # Add pickup if not yet started
+                if ride.get('status') == 'accepted':
+                    points.append((ride['pickupLocation']['latitude'], ride['pickupLocation']['longitude']))
+                # Add stops
+                for stop in ride.get('stops', []):
+                    points.append((stop['latitude'], stop['longitude']))
+                # Add dropoff
+                points.append((ride['dropoffLocation']['latitude'], ride['dropoffLocation']['longitude']))
+            
+            if not points:
+                 return {"message": "No coordinates to route", "route": None}
+                 
+            destination = points[-1]
+            waypoints = points[:-1]
+            
+            route = await maps_service.get_optimized_route(origin, destination, waypoints)
+            if not route:
+                 raise ConflictError("Could not optimize route via Google Maps")
+                 
+            return {"route": route, "message": "Route optimized successfully"}
+            
+        except ConflictError:
+            raise
+        except Exception as e:
+            logger.error(f"Error optimizing route: {str(e)}")
+            raise
+
 

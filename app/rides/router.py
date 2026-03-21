@@ -8,7 +8,7 @@ from app.core.security import get_current_user
 from app.core.exceptions import ValidationError, NotFoundError
 from app.rides.service import RideService
 from app.drivers.service import DriverService
-from app.rides.schemas import RequestRideRequest, CancelRideRequest, RateRideRequest
+from app.rides.schemas import RequestRideRequest, CancelRideRequest, RateRideRequest, SOSRequest, ShareTrackingRequest, UpdateStopsRequest
 from app.core.logging import logger
 
 router = APIRouter()
@@ -373,4 +373,61 @@ async def join_carpool(
         )
     except Exception as e:
         logger.error(f"Join carpool error: {str(e)}")
+        raise
+
+@router.post("/ride/{ride_id}/sos", status_code=status.HTTP_200_OK)
+async def trigger_sos(
+    ride_id: str,
+    request: SOSRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Trigger an emergency alert for a ride"""
+    try:
+        user_id = current_user["uid"]
+        alert = await service.trigger_sos(ride_id, user_id, request)
+        
+        return success_response(
+            message="SOS alert triggered successfully. Admins have been notified.",
+            data=alert
+        )
+    except Exception as e:
+        logger.error(f"SOS alert error: {str(e)}")
+        raise
+
+@router.post("/ride/{ride_id}/share-tracking", status_code=status.HTTP_200_OK)
+async def share_tracking(
+    ride_id: str,
+    request: ShareTrackingRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate a shareable tracking link for a ride"""
+    try:
+        user_id = current_user["uid"]
+        tracking_info = await service.generate_tracking_link(ride_id, user_id, request)
+        
+        return success_response(
+            message="Tracking link generated successfully",
+            data=tracking_info
+        )
+    except Exception as e:
+        logger.error(f"Share tracking error: {str(e)}")
+        raise
+
+@router.put("/ride/{ride_id}/stops", status_code=status.HTTP_200_OK)
+async def update_ride_stops(
+    ride_id: str,
+    request: UpdateStopsRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update intermediate stops for a ride"""
+    try:
+        user_id = current_user["uid"]
+        ride = await service.update_stops(ride_id, user_id, request.stops)
+
+        return success_response(
+            message="Ride stops updated successfully",
+            data=ride
+        )
+    except Exception as e:
+        logger.error(f"Update ride stops error: {str(e)}")
         raise

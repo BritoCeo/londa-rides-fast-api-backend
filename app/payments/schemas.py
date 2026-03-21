@@ -22,7 +22,7 @@ class CalculateFareRequest(BaseModel):
 class ProcessPaymentRequest(BaseModel):
     """Process payment request"""
     ride_id: str
-    user_id: str
+    user_id: Optional[str] = None
     amount: float = Field(13.00, description="Amount in NAD")
     payment_method: str = Field("cash", description="Payment method (cash only)")
 

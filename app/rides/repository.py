@@ -635,3 +635,90 @@ class RideRepository:
         except Exception as e:
             logger.error(f"Error adding carpool member to ride {ride_id}: {str(e)}")
             raise
+
+    async def save_sos_alert(
+        self,
+        ride_id: str,
+        user_id: str,
+        location: Optional[Dict[str, Any]] = None,
+        reason: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Save an SOS alert to Firestore"""
+        try:
+            sos_ref = self.db.collection("sos_alerts").document()
+            
+            sos_data = {
+                "id": sos_ref.id,
+                "rideId": ride_id,
+                "userId": user_id,
+                "location": location,
+                "reason": reason,
+                "status": "active",
+                "createdAt": datetime.utcnow()
+            }
+            
+            sos_ref.set(sos_data)
+            saved_doc = sos_ref.get()
+            return serialize_firestore_document(saved_doc.to_dict()) if saved_doc.exists else serialize_firestore_document(sos_data)
+        except Exception as e:
+            logger.error(f"Error saving SOS alert: {str(e)}")
+            raise
+
+    async def create_tracking_link(
+        self,
+        ride_id: str,
+        duration_minutes: int
+    ) -> Dict[str, Any]:
+        """Create a shareable tracking link for a ride"""
+        try:
+            import uuid
+            tracking_token = str(uuid.uuid4())
+            expires_at = datetime.utcnow() + timedelta(minutes=duration_minutes)
+            
+            ride_ref = self.db.collection(self.collection).document(ride_id)
+            doc = ride_ref.get()
+            if not doc.exists:
+                raise NotFoundError(f"Ride {ride_id} not found")
+                
+            updates = {
+                "trackingToken": tracking_token,
+                "trackingExpiresAt": expires_at,
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            }
+            
+            ride_ref.update(updates)
+            
+            return {
+                "tracking_url": f"https://londarides.com/track/{tracking_token}",
+                "expires_at": expires_at.isoformat()
+            }
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error creating tracking link: {str(e)}")
+            raise
+
+    async def update_ride_stops(self, ride_id: str, stops: list) -> Dict[str, Any]:
+        """Update intermediate stops for a ride"""
+        try:
+            ride_ref = self.db.collection("rides").document(ride_id)
+            doc = ride_ref.get()
+
+            if not doc.exists:
+                raise NotFoundError(f"Ride {ride_id} not found")
+
+            stops_data = [stop.model_dump() for stop in stops]
+
+            updates = {
+                "stops": stops_data,
+                "updatedAt": datetime.utcnow()
+            }
+
+            ride_ref.update(updates)
+
+            return {**doc.to_dict(), **updates, "id": ride_id, "updatedAt": updates["updatedAt"].isoformat()}
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating ride stops: {str(e)}")
+            raise

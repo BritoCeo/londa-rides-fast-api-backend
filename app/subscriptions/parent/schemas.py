@@ -24,26 +24,26 @@ class ChildProfile(BaseModel):
 
 class SubscribeParentPackageRequest(BaseModel):
     """Subscribe to parent monthly package"""
-    user_id: str
+    user_id: Optional[str] = None
     payment_method: str = Field("cash", description="Payment method (cash only)")
     children_profiles: List[ChildProfile] = Field(..., min_items=1)
 
 
 class UpdateParentSubscriptionRequest(BaseModel):
     """Update parent subscription settings"""
-    user_id: str
+    user_id: Optional[str] = None
     auto_renew: Optional[bool] = None
 
 
 class CancelParentSubscriptionRequest(BaseModel):
     """Cancel parent subscription"""
-    user_id: str
+    user_id: Optional[str] = None
     reason: Optional[str] = None
 
 
 class AddChildProfileRequest(BaseModel):
     """Add child profile to subscription"""
-    user_id: str
+    user_id: Optional[str] = None
     child_name: str = Field(..., min_length=1, max_length=100)
     child_age: int = Field(..., ge=5, le=18)
     school_name: str = Field(..., min_length=1, max_length=200)

@@ -271,3 +271,74 @@ class RideService:
             
         # Add logic to add user to carpool members and split fare
         return await self.repository.add_carpool_member(ride_id, user_id, request.passengerCount)
+
+    async def trigger_sos(self, ride_id: str, user_id: str, request: Any) -> Dict[str, Any]:
+        """Trigger an SOS alert for a ride."""
+        try:
+            ride = await self.repository.get_ride_by_id(ride_id)
+            if not ride:
+                raise NotFoundError("Ride not found")
+                
+            # Verify the user is part of the ride (either user or driver)
+            if ride.get("userId") != user_id and ride.get("driverId") != user_id:
+                raise ConflictError("Not authorized to access this ride")
+                
+            location = request.location.model_dump() if getattr(request, 'location', None) else None
+            reason = getattr(request, 'reason', None)
+            
+            # Save the alert
+            alert = await self.repository.save_sos_alert(ride_id, user_id, location, reason)
+            
+            # Notify admins and relevant parties
+            await notification_service.notify_sos_alert(ride_id, user_id, location, reason)
+            
+            return alert
+        except (NotFoundError, ConflictError):
+            raise
+        except Exception as e:
+            logger.error(f"Error triggering SOS: {str(e)}")
+            raise
+
+    async def generate_tracking_link(self, ride_id: str, user_id: str, request: Any) -> Dict[str, Any]:
+        """Generate a secure, temporary tracking link for a ride."""
+        try:
+            ride = await self.repository.get_ride_by_id(ride_id)
+            if not ride:
+                raise NotFoundError("Ride not found")
+                
+            # Only the rider can share the tracking link
+            if ride.get("userId") != user_id:
+                raise ConflictError("Only the rider can share tracking links")
+                
+            duration = getattr(request, 'duration_minutes', 60)
+            
+            # Generate and save tracking info
+            return await self.repository.create_tracking_link(ride_id, duration)
+        except (NotFoundError, ConflictError):
+            raise
+        except Exception as e:
+            logger.error(f"Error generating tracking link: {str(e)}")
+            raise
+
+    async def update_stops(self, ride_id: str, user_id: str, stops: list) -> Dict[str, Any]:
+        """Update intermediate stops for a ride"""
+        try:
+            ride = await self.repository.get_ride_by_id(ride_id)
+            if not ride:
+                raise NotFoundError("Ride not found")
+
+            if ride.get("userId") != user_id:
+                raise ConflictError("Only the rider can update stops")
+
+            # Validate ride state (e.g. can't add stops to completed/cancelled rides)
+            status = ride.get("status")
+            if status in ["completed", "cancelled"]:
+                raise ConflictError(f"Cannot update stops for a {status} ride")
+
+            return await self.repository.update_ride_stops(ride_id, stops)
+        except (NotFoundError, ConflictError):
+            raise
+        except Exception as e:
+            logger.error(f"Error updating ride stops: {str(e)}")
+            raise
+

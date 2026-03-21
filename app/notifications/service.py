@@ -63,7 +63,38 @@ class NotificationService:
             
         except Exception as e:
             logger.error(f"Error sending ride accepted notification: {str(e)}")
-    
+            
+    async def notify_sos_alert(
+        self,
+        ride_id: str,
+        user_id: str,
+        location: Optional[Dict[str, Any]] = None,
+        reason: Optional[str] = None
+    ) -> None:
+        """Notify admins and relevant parties about an SOS alert"""
+        try:
+            # Here we would normally query for Admins or linked Parents
+            # For now, we simulate by sending an admin broadcast or logging
+            title = "EMERGENCY: SOS Alert Triggered"
+            body = f"SOS triggered for ride {ride_id} by user {user_id}."
+            if reason:
+                body += f" Reason: {reason}"
+                
+            data = {
+                "type": "sos_alert",
+                "rideId": ride_id,
+                "userId": user_id,
+            }
+            if location:
+                data["location"] = str(location)
+                
+            # Assume we have an admin topic or we broadcast it
+            await self.fcm.send_to_topic("admins", title, body, data)
+            logger.info(f"SOS alert notification sent for ride {ride_id}")
+            
+        except Exception as e:
+            logger.error(f"Error sending SOS notification: {str(e)}")
+
     async def notify_ride_started(
         self,
         user_id: str,

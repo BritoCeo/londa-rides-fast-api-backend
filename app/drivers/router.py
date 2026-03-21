@@ -11,7 +11,9 @@ from app.drivers.schemas import (
     DriverVerifyOTPRequest,
     CreateDriverAccountRequest,
     UpdateDriverStatusRequest,
-    UpdateDriverLocationRequest
+    UpdateDriverLocationRequest,
+    UpdateVehicleRequest,
+    UploadDocumentRequest
 )
 from app.core.logging import logger
 
@@ -200,9 +202,38 @@ async def get_vetting_status(
         logger.error(f"Error fetching vetting status: {str(e)}")
         raise
 
+@router.get("/driver/vehicle", status_code=status.HTTP_200_OK)
+async def get_vehicle_details(
+    current_driver: dict = Depends(get_current_driver)
+):
+    """
+    Get driver's vehicle details.
+    """
+    try:
+        driver_id = current_driver["uid"]
+        # In a real app we might have a specific repository method for just vehicle, 
+        # but since we store it under the driver document, getting the profile is enough.
+        driver = await service.get_driver_profile(driver_id)
+        
+        vehicle_details = {
+            "vehicle_model": driver.get("vehicle_model"),
+            "vehicle_plate": driver.get("vehicle_plate"),
+            "vehicle_color": driver.get("vehicle_color"),
+            # Include other potential fields
+            "vehicle_make": driver.get("vehicle_make")
+        }
+        
+        return success_response(
+            message="Vehicle details retrieved successfully",
+            data=vehicle_details
+        )
+    except Exception as e:
+        logger.error(f"Vehicle get error: {str(e)}")
+        raise
+
 @router.put("/driver/vehicle", status_code=status.HTTP_200_OK)
 async def update_vehicle_details(
-    vehicle_data: Dict[str, Any],
+    vehicle_data: UpdateVehicleRequest,
     current_driver: dict = Depends(get_current_driver)
 ):
     """
@@ -218,6 +249,28 @@ async def update_vehicle_details(
         )
     except Exception as e:
         logger.error(f"Vehicle update error: {str(e)}")
+        raise
+
+@router.post("/driver/documents/metadata", status_code=status.HTTP_201_CREATED)
+async def upload_document_metadata(
+    request: UploadDocumentRequest,
+    current_driver: dict = Depends(get_current_driver)
+):
+    """
+    Save driver document metadata (assumes file is uploaded to cloud storage securely by client).
+    This tracks the driver's license, Namibian taxi permits, and background check files.
+    """
+    try:
+        driver_id = current_driver["uid"]
+        doc = await service.upload_document_metadata(driver_id, request)
+        
+        return success_response(
+            message="Document metadata saved successfully",
+            data=doc,
+            status_code=201
+        )
+    except Exception as e:
+        logger.error(f"Driver document metadata upload error: {str(e)}")
         raise
 
 

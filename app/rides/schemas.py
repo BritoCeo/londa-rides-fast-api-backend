@@ -119,3 +119,26 @@ class ScheduleRideRequest(BaseModel):
 class JoinCarpoolRequest(BaseModel):
     ride_id: str
     passengerCount: int = Field(1, ge=1, le=8)
+
+
+class SOSRequest(BaseModel):
+    """Trigger an emergency alert"""
+    location: Optional[Location] = None
+    reason: Optional[str] = Field(None, max_length=500)
+
+
+class ShareTrackingRequest(BaseModel):
+    """Request to share trip tracking"""
+    duration_minutes: Optional[int] = Field(60, ge=15, le=180, description="How long the link should remain active")
+
+
+class ShareTrackingResponse(BaseModel):
+    """Response containing tracking link"""
+    tracking_url: str
+    expires_at: datetime
+
+
+class UpdateStopsRequest(BaseModel):
+    """Add or update intermediate stops for a ride"""
+    stops: list[Location] = Field(..., max_length=5, description="List of intermediate stops (max 5)")
+

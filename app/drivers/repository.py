@@ -2,6 +2,7 @@
 Driver Repository - Firestore Operations
 """
 import math
+from datetime import datetime
 from typing import Optional, Dict, Any
 from firebase_admin import firestore
 from app.core.firebase import get_firestore
@@ -287,4 +288,73 @@ class DriverRepository:
         distance = R * c
         
         return distance
+
+    async def update_vehicle_details(
+        self,
+        driver_id: str,
+        update_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Update vehicle details for a driver"""
+        try:
+            doc_ref = self.db.collection(self.collection).document(driver_id)
+            doc = doc_ref.get()
+            
+            if not doc.exists:
+                raise NotFoundError(f"Driver {driver_id} not found")
+                
+            updates = {
+                **update_data,
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            }
+            
+            doc_ref.update(updates)
+            
+            updated_doc = doc_ref.get()
+            return updated_doc.to_dict()
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating vehicle details: {str(e)}")
+            raise
+
+    async def add_driver_document(
+        self,
+        driver_id: str,
+        document_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Add a driver document for vetting"""
+        try:
+            doc_ref = self.db.collection(self.collection).document(driver_id)
+            driver_doc = doc_ref.get()
+            
+            if not driver_doc.exists:
+                raise NotFoundError(f"Driver {driver_id} not found")
+
+            # Store documents in a subcollection under the driver
+            docs_col_ref = doc_ref.collection("documents")
+            new_doc_ref = docs_col_ref.document()
+            
+            db_doc_data = {
+                "id": new_doc_ref.id,
+                "driverId": driver_id,
+                **document_data,
+                "verified": False,  # Pending admin approval
+                "createdAt": datetime.utcnow(),
+            }
+            
+            new_doc_ref.set(db_doc_data)
+            
+            # Update driver's overall vetting status to pending review if not already
+            doc_ref.update({
+                "vettingStatus": "pending_review",
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            })
+            
+            saved_doc = new_doc_ref.get()
+            return saved_doc.to_dict() if saved_doc.exists else db_doc_data
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error adding driver document: {str(e)}")
+            raise
 

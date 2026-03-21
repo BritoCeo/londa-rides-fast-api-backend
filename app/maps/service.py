@@ -245,7 +245,57 @@ class MapsService:
             logger.error(f"Error getting directions: {str(e)}")
             return None
 
+    async def get_optimized_route(
+        self,
+        origin: Tuple[float, float],
+        destination: Tuple[float, float],
+        waypoints: list[Tuple[float, float]]
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get an optimized route including intermediate waypoints.
 
-# Global maps service instance
-maps_service = MapsService()
+        Args:
+            origin: (latitude, longitude) tuple
+            destination: (latitude, longitude) tuple
+            waypoints: list of (latitude, longitude) tuples
 
+        Returns:
+            Dict containing the optimized sequence and route data.
+        """
+        if not self.client:
+            logger.warning("Google Maps client not available")
+            return None
+
+        try:
+            formatted_origin = f"{origin[0]},{origin[1]}"
+            formatted_dest = f"{destination[0]},{destination[1]}"
+            formatted_waypoints = [f"{wp[0]},{wp[1]}" for wp in waypoints]
+
+            directions_result = self.client.directions(
+                formatted_origin,
+                formatted_dest,
+                waypoints=formatted_waypoints,
+                optimize_waypoints=True,
+                mode="driving"
+            )
+
+            if directions_result:
+                route = directions_result[0]
+                return {
+                    "optimized_waypoint_order": route.get("waypoint_order", []),
+                    "legs": [
+                        {
+                            "distance": leg["distance"]["value"] / 1000.0,
+                            "duration": leg["duration"]["value"],
+                            "start_address": leg["start_address"],
+                            "end_address": leg["end_address"],
+                            "start_location": {"lat": leg["start_location"]["lat"], "lng": leg["start_location"]["lng"]},
+                            "end_location": {"lat": leg["end_location"]["lat"], "lng": leg["end_location"]["lng"]}
+                        } for leg in route["legs"]
+                    ],
+                    "overview_polyline": route.get("overview_polyline", {}).get("points")
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting optimized route: {str(e)}")
+            return None

@@ -5,7 +5,7 @@ import json
 import sys
 
 # Load the collection
-with open('postmancollection/Londa_Rides_Detailed_API_Collection.postman_collection.json', 'r', encoding='utf-8') as f:
+with open('postmancollection/Londa_Rides_API_Collection_Complete.postman_collection.json', 'r', encoding='utf-8') as f:
     collection = json.load(f)
 
 # Define public endpoints (no auth required)
@@ -44,7 +44,6 @@ REQUEST_BODIES = {
         "userType": "student"
     },
     '/request-ride': {
-        "user_id": "{{user_id}}",
         "pickup_location": {
             "latitude": -22.5700,
             "longitude": 17.0836,
@@ -63,12 +62,10 @@ REQUEST_BODIES = {
     },
     '/cancel-ride': {
         "ride_id": "{{ride_id}}",
-        "user_id": "{{user_id}}",
         "reason": "Changed my mind"
     },
     '/rate-ride': {
         "ride_id": "{{ride_id}}",
-        "user_id": "{{user_id}}",
         "rating": 5,
         "review": "Great ride!"
     },
@@ -112,7 +109,6 @@ REQUEST_BODIES = {
         "final_fare": 13.00
     },
     '/driver/subscriptions': {
-        "driver_id": "{{driver_id}}",
         "payment_method": "cash"
     },
     '/driver/subscriptions/update': {
@@ -120,12 +116,10 @@ REQUEST_BODIES = {
         "payment_method": "cash"
     },
     '/driver/subscriptions/payment': {
-        "driver_id": "{{driver_id}}",
         "payment_method": "cash",
         "amount": 150.00
     },
     '/parent/subscriptions': {
-        "user_id": "{{user_id}}",
         "payment_method": "cash",
         "children_profiles": [
             {
@@ -142,15 +136,12 @@ REQUEST_BODIES = {
         ]
     },
     '/parent/subscriptions/update': {
-        "user_id": "{{user_id}}",
         "auto_renew": True
     },
     '/parent/subscriptions/cancel': {
-        "user_id": "{{user_id}}",
         "reason": "No longer needed"
     },
     '/parent/subscriptions/children': {
-        "user_id": "{{user_id}}",
         "child_name": "John Doe",
         "child_age": 10,
         "school_name": "Windhoek Primary School",
@@ -174,7 +165,6 @@ REQUEST_BODIES = {
     },
     '/payments/process': {
         "ride_id": "{{ride_id}}",
-        "user_id": "{{user_id}}",
         "amount": 13.00,
         "payment_method": "cash"
     },
@@ -271,7 +261,7 @@ if 'item' in collection:
     process_items(collection['item'])
 
 # Save updated collection
-with open('postmancollection/Londa_Rides_Detailed_API_Collection.postman_collection.json', 'w', encoding='utf-8') as f:
+with open('postmancollection/Londa_Rides_API_Collection_Complete.postman_collection.json', 'w', encoding='utf-8') as f:
     json.dump(collection, f, indent=2, ensure_ascii=False)
 
 print("Postman collection updated successfully!")

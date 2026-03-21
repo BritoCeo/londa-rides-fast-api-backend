@@ -64,3 +64,21 @@ class UpdateDriverLocationRequest(BaseModel):
     longitude: float = Field(..., ge=-180, le=180)
     status: Optional[Literal["online", "offline", "busy"]] = None
 
+
+class UpdateVehicleRequest(BaseModel):
+    """Update driver vehicle details"""
+    vehicle_make: Optional[str] = Field(None, min_length=1, max_length=100)
+    vehicle_model: Optional[str] = Field(None, min_length=1, max_length=100)
+    vehicle_color: Optional[str] = Field(None, min_length=1, max_length=50)
+    vehicle_plate: Optional[str] = Field(None, min_length=1, max_length=20)
+
+
+class UploadDocumentRequest(BaseModel):
+    """Upload driver document metadata"""
+    document_type: Literal["drivers_license", "taxi_permit", "background_check", "vehicle_registration"] = Field(
+        ..., description="Type of document for vetting"
+    )
+    document_url: str = Field(..., description="Secure URL (e.g. Firebase Storage) where the file has been uploaded")
+    expiry_date: Optional[datetime] = None
+    notes: Optional[str] = None
+

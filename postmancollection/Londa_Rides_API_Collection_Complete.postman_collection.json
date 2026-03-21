@@ -142,7 +142,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/registration",
@@ -190,7 +195,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"otp\": \"123456\",\n  \"sessionInfo\": \"{{session_info}}\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"otp\": \"123456\",\n  \"sessionInfo\": \"{{session_info}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/verify-otp",
@@ -227,7 +237,14 @@
                     ],
                     "request": {
                         "auth": {
-                            "type": "noauth"
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -256,7 +273,14 @@
                     "name": "Request Email OTP",
                     "request": {
                         "auth": {
-                            "type": "noauth"
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -285,7 +309,14 @@
                     "name": "Verify Email OTP",
                     "request": {
                         "auth": {
-                            "type": "noauth"
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -322,7 +353,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"email\": \"{{test_email}}\",\n  \"name\": \"Test User\",\n  \"userType\": \"student\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"email\": \"{{test_email}}\",\n  \"name\": \"Test User\",\n  \"userType\": \"student\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/create-account",
@@ -331,6 +367,16 @@
                             ],
                             "path": [
                                 "create-account"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -372,6 +418,16 @@
                             "path": [
                                 "refresh-token"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -389,6 +445,16 @@
                             "path": [
                                 "me"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -405,7 +471,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}"
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/update-profile",
@@ -414,6 +485,16 @@
                             ],
                             "path": [
                                 "update-profile"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -431,7 +512,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"latitude\": -22.5700,\n  \"longitude\": 17.0836\n}"
+                            "raw": "{\n  \"latitude\": -22.57,\n  \"longitude\": 17.0836\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/update-location",
@@ -440,6 +526,16 @@
                             ],
                             "path": [
                                 "update-location"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -478,7 +574,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"pickup_location\": {\n    \"latitude\": -22.5700,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.5800,\n    \"longitude\": 17.0900,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"school\" // or \"standard\",\n  \"estimated_fare\": 13.00,\n  \"passengerCount\": 1\n}"
+                            "raw": "{\n  \"pickup_location\": {\n    \"latitude\": -22.57,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.58,\n    \"longitude\": 17.09,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"standard\",\n  \"estimated_fare\": 13.0,\n  \"passengerCount\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/request-ride",
@@ -487,6 +588,16 @@
                             ],
                             "path": [
                                 "request-ride"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -523,6 +634,16 @@
                                 }
                             ],
                             "description": "Finds available drivers near the user's location using Haversine distance calculation. Returns drivers within the specified radius, sorted by distance (closest first). Each driver includes a distance_km field showing exact distance from the search location."
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": [
@@ -678,7 +799,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"reason\": \"Changed my mind\"\n}"
+                            "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"reason\": \"Changed my mind\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/cancel-ride",
@@ -687,6 +813,16 @@
                             ],
                             "path": [
                                 "cancel-ride"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -704,7 +840,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"rating\": 5,\n  \"review\": \"Great ride!\"\n}"
+                            "raw": "{\n  \"ride_id\": \"{{ride_id}}\",\n  \"rating\": 5,\n  \"review\": \"Great ride!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/rate-ride",
@@ -713,6 +854,16 @@
                             ],
                             "path": [
                                 "rate-ride"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -731,6 +882,16 @@
                             "path": [
                                 "ride-status",
                                 "{{ride_id}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -759,6 +920,16 @@
                                     "value": "10"
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -784,6 +955,16 @@
                                     "value": "50"
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -807,6 +988,16 @@
                                     "key": "ride_type",
                                     "value": "school",
                                     "description": "Filter by ride type (e.g., 'school' or 'standard')"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
                                 }
                             ]
                         }
@@ -849,7 +1040,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/driver/send-otp",
@@ -879,7 +1075,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"otp\": \"123456\",\n  \"sessionInfo\": \"{{session_info}}\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"otp\": \"123456\",\n  \"sessionInfo\": \"{{session_info}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/driver/verify-otp",
@@ -917,7 +1118,14 @@
                     ],
                     "request": {
                         "auth": {
-                            "type": "noauth"
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -955,7 +1163,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"email\": \"{{test_email}}\",\n  \"name\": \"Test Driver\",\n  \"license_number\": \"DL123456\",\n  \"vehicle_model\": \"Toyota Corolla\",\n  \"vehicle_plate\": \"ABC-123\",\n  \"vehicle_color\": \"White\"\n}"
+                            "raw": "{\n  \"phone_number\": \"{{test_phone}}\",\n  \"email\": \"{{test_email}}\",\n  \"name\": \"Test User\",\n  \"userType\": \"student\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/driver/create-account",
@@ -965,6 +1178,16 @@
                             "path": [
                                 "driver",
                                 "create-account"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -984,6 +1207,16 @@
                                 "driver",
                                 "me"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1000,7 +1233,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"status\": \"online\"\n}"
+                            "raw": "{\n  \"status\": \"online\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/driver/update-status",
@@ -1010,6 +1248,16 @@
                             "path": [
                                 "driver",
                                 "update-status"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1027,7 +1275,12 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"latitude\": -22.5700,\n  \"longitude\": 17.0836,\n  \"status\": \"online\"\n}"
+                            "raw": "{\n  \"latitude\": -22.57,\n  \"longitude\": 17.0836,\n  \"status\": \"online\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         },
                         "url": {
                             "raw": "{{api_base}}/driver/update-location",
@@ -1037,6 +1290,16 @@
                             "path": [
                                 "driver",
                                 "update-location"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1067,6 +1330,16 @@
                                     "value": "50"
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1093,6 +1366,16 @@
                             "path": [
                                 "driver",
                                 "accept-ride"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1121,6 +1404,16 @@
                                 "driver",
                                 "decline-ride"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1147,6 +1440,16 @@
                             "path": [
                                 "driver",
                                 "start-ride"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1175,6 +1478,16 @@
                                 "driver",
                                 "complete-ride"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1201,6 +1514,16 @@
                                 {
                                     "key": "limit",
                                     "value": "10"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
                                 }
                             ]
                         }
@@ -1231,6 +1554,16 @@
                                 "{{ride_id}}",
                                 "messages"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1257,6 +1590,16 @@
                             "path": [
                                 "driver",
                                 "report-breakdown"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1291,6 +1634,16 @@
                                 "subscription"
                             ],
                             "description": "Creates a driver subscription. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1308,6 +1661,16 @@
                             "path": [
                                 "driver",
                                 "subscription"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1327,6 +1690,16 @@
                                 "driver",
                                 "subscription",
                                 "{{driver_id}}"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1357,6 +1730,16 @@
                                 "{{driver_id}}"
                             ],
                             "description": "Updates driver subscription settings. The driver_id in the path must match the authenticated driver's ID."
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1386,6 +1769,16 @@
                                 "payment"
                             ],
                             "description": "Processes subscription payment. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1414,6 +1807,16 @@
                                 {
                                     "key": "limit",
                                     "value": "10"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
                                 }
                             ]
                         }
@@ -1445,6 +1848,16 @@
                                 "{{driver_id}}"
                             ],
                             "description": "Cancels driver subscription. The driver_id in the path must match the authenticated driver's ID. The reason field is optional in the request body."
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1477,6 +1890,16 @@
                                 "parent",
                                 "subscribe"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1499,6 +1922,16 @@
                                 {
                                     "key": "user_id",
                                     "value": "{{user_id}}"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
                                 }
                             ]
                         }
@@ -1528,6 +1961,16 @@
                                 "parent",
                                 "subscription"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1554,6 +1997,16 @@
                             "path": [
                                 "parent",
                                 "subscription"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1587,6 +2040,16 @@
                                     "value": "2024"
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1609,6 +2072,16 @@
                                 {
                                     "key": "user_id",
                                     "value": "{{user_id}}"
+                                }
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
                                 }
                             ]
                         }
@@ -1637,6 +2110,16 @@
                             "path": [
                                 "parent",
                                 "children"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1670,6 +2153,16 @@
                                 "payment",
                                 "calculate-fare"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1696,6 +2189,16 @@
                             "path": [
                                 "payment",
                                 "process"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1725,6 +2228,16 @@
                                     "value": "10"
                                 }
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1751,6 +2264,16 @@
                             "path": [
                                 "subscribe-monthly"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1774,6 +2297,16 @@
                                 "analytics",
                                 "rides"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1791,6 +2324,16 @@
                             "path": [
                                 "analytics",
                                 "performance"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1810,6 +2353,16 @@
                                 "driver",
                                 "analytics",
                                 "earnings"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1865,6 +2418,16 @@
                                 "analytics",
                                 "rides"
                             ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -1883,6 +2446,16 @@
                                 "driver",
                                 "analytics",
                                 "performance"
+                            ]
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
                             ]
                         }
                     },
@@ -1918,6 +2491,16 @@
                                     "language": "json"
                                 }
                             }
+                        },
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     },
                     "response": []
@@ -2597,6 +3180,214 @@
                         }
                     },
                     "response": []
+                }
+            ]
+        },
+        {
+            "name": "SRS New Features",
+            "item": [
+                {
+                    "name": "Trigger SOS Alert",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/ride/{{ride_id}}/sos",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "ride",
+                                "{{ride_id}}",
+                                "sos"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"location\": {\n    \"latitude\": -22.56,\n    \"longitude\": 17.06\n  },\n  \"reason\": \"Emergency test\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Share Track Link",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/ride/{{ride_id}}/share-tracking",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "ride",
+                                "{{ride_id}}",
+                                "share-tracking"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"duration_minutes\": 60\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Update Ride Stops",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/ride/{{ride_id}}/stops",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "ride",
+                                "{{ride_id}}",
+                                "stops"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"stops\": [\n    {\n      \"latitude\": -22.57,\n      \"longitude\": 17.07,\n      \"address\": \"Intermediate Stop Address\"\n    }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Driver Route Optimization",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{driver_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/driver/route-optimization",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "driver",
+                                "route-optimization"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Vehicle Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{driver_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/driver/vehicle",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "driver",
+                                "vehicle"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Vehicle Details",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{driver_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/driver/vehicle",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "driver",
+                                "vehicle"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"make\": \"Toyota\",\n  \"model\": \"Corolla\",\n  \"year\": 2023,\n  \"color\": \"White\",\n  \"licensePlate\": \"N 1234 W\",\n  \"capacity\": 4\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Upload Document Metadata",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{driver_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/driver/documents/metadata",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "driver",
+                                "documents",
+                                "metadata"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"document_type\": \"driver_license\",\n  \"document_url\": \"https://res.cloudinary.com/test-url\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
                 }
             ]
         }
