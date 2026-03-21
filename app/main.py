@@ -1,6 +1,9 @@
 """
 FastAPI Main Application
 """
+import os
+import asyncio
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -9,6 +12,26 @@ from app.api.v1.api import api_router
 from app.core.exceptions import setup_exception_handlers
 from app.core.firebase import initialize_firebase
 from app.core.logging import logger
+
+
+async def keep_alive_task():
+    """Background task to fetch the health endpoint every 14 minutes to prevent Render from sleeping."""
+    url = os.environ.get("RENDER_EXTERNAL_URL", "")
+    if not url:
+        logger.warning("RENDER_EXTERNAL_URL not set. Falling back to localhost:10000 for keep-alive.")
+        url = "http://127.0.0.1:10000"
+    
+    health_url = f"{url.rstrip('/')}/health"
+    logger.info(f"Starting keep-alive background task polling {health_url} every 14 minutes")
+    
+    async with httpx.AsyncClient() as client:
+        while True:
+            await asyncio.sleep(14 * 60)  # Sleep for 14 minutes
+            try:
+                response = await client.get(health_url, timeout=10.0)
+                logger.info(f"[Keep-Alive] Ping {health_url} - Status: {response.status_code}")
+            except Exception as e:
+                logger.error(f"[Keep-Alive] Ping failed: {str(e)}")
 
 
 @asynccontextmanager
@@ -23,10 +46,18 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize Firebase: {str(e)}")
         # Continue anyway for development
     
+    # Start keep alive task
+    keep_alive = asyncio.create_task(keep_alive_task())
+    
     yield
     
     # Shutdown
     logger.info("Shutting down Londa API...")
+    keep_alive.cancel()
+    try:
+        await keep_alive
+    except asyncio.CancelledError:
+        pass
 
 
 # Create FastAPI application instance
