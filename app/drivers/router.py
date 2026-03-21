@@ -1,7 +1,8 @@
 """
 Driver Router - API Endpoints
 """
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, UploadFile, File, Form
+from typing import Dict, Any, List
 from app.core.responses import success_response
 from app.core.security import get_current_driver
 from app.drivers.service import DriverService
@@ -157,6 +158,68 @@ async def update_driver_location(
     except Exception as e:
         logger.error(f"Update driver location error: {str(e)}")
         raise
+
+@router.post("/driver/documents", status_code=status.HTTP_200_OK)
+async def upload_driver_documents(
+    file: UploadFile = File(...),
+    document_type: str = Form(...),
+    current_driver: dict = Depends(get_current_driver)
+):
+    """
+    Upload a driver's document for vetting (license, permit, police_clearance)
+    """
+    try:
+        driver_id = current_driver["uid"]
+        # Use service to upload document
+        document_url = await service.upload_document(driver_id, document_type, file)
+        
+        return success_response(
+            message="Document uploaded successfully",
+            data={"document_url": document_url, "document_type": document_type}
+        )
+    except Exception as e:
+        logger.error(f"Driver document upload error: {str(e)}")
+        raise
+
+@router.get("/driver/documents/status", status_code=status.HTTP_200_OK)
+async def get_vetting_status(
+    current_driver: dict = Depends(get_current_driver)
+):
+    """
+    Get the vetting and document status.
+    """
+    try:
+        driver_id = current_driver["uid"]
+        vetting_status = await service.get_vetting_status(driver_id)
+        
+        return success_response(
+            message="Vetting status retrieved successfully",
+            data=vetting_status
+        )
+    except Exception as e:
+        logger.error(f"Error fetching vetting status: {str(e)}")
+        raise
+
+@router.put("/driver/vehicle", status_code=status.HTTP_200_OK)
+async def update_vehicle_details(
+    vehicle_data: Dict[str, Any],
+    current_driver: dict = Depends(get_current_driver)
+):
+    """
+    Manage/update vehicle details.
+    """
+    try:
+        driver_id = current_driver["uid"]
+        updated = await service.update_vehicle(driver_id, vehicle_data)
+        
+        return success_response(
+            message="Vehicle details updated successfully",
+            data=updated
+        )
+    except Exception as e:
+        logger.error(f"Vehicle update error: {str(e)}")
+        raise
+
 
 
 

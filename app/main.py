@@ -45,6 +45,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to initialize Firebase: {str(e)}")
         # Continue anyway for development
+        
+    try:
+        import cloudinary
+        if settings.CLOUDINARY_URL:
+            cloudinary.config(url=settings.CLOUDINARY_URL)
+            logger.info("Cloudinary initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Cloudinary: {str(e)}")
     
     # Start keep alive task
     keep_alive = asyncio.create_task(keep_alive_task())

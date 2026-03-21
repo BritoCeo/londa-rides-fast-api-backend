@@ -218,3 +218,62 @@ class DriverService:
             logger.error(f"Error getting nearby drivers: {str(e)}")
             raise
 
+    async def upload_document(self, driver_id: str, document_type: str, file: Any) -> str:
+        """Upload driver document to Cloudinary and save reference"""
+        import cloudinary.uploader
+        try:
+            # Upload to Cloudinary
+            result = cloudinary.uploader.upload(file.file)
+            document_url = result.get("secure_url")
+            
+            if not document_url:
+                raise ValidationError("Failed to upload document to Cloudinary")
+            
+            # Save document URL and update status
+            document_data = {
+                f"documents.{document_type}": document_url,
+                "vettingStatus": "pending"  # Needs admin approval
+            }
+            await self.repository.update_driver(driver_id, document_data)
+            
+            return document_url
+        except Exception as e:
+            logger.error(f"Error uploading document: {str(e)}")
+            raise ValidationError(f"Document upload failed: {str(e)}")
+
+    async def get_vetting_status(self, driver_id: str) -> Dict[str, Any]:
+        """Get driver vetting status and documents"""
+        try:
+            driver = await self.repository.get_driver_by_id(driver_id)
+            if not driver:
+                raise NotFoundError("Driver not found")
+                
+            return {
+                "vettingStatus": driver.get("vettingStatus", "pending"),
+                "documents": driver.get("documents", {})
+            }
+        except Exception as e:
+            logger.error(f"Error fetching vetting status: {str(e)}")
+            raise
+
+    async def update_vehicle(self, driver_id: str, vehicle_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update driver vehicle details"""
+        try:
+            # Map standard vehicle fields
+            update_data = {
+                "vehicleMake": vehicle_data.get("make"),
+                "vehicleModel": vehicle_data.get("model"),
+                "vehiclePlate": vehicle_data.get("license_plate"),
+                "vehicleColor": vehicle_data.get("color"),
+                "roadworthyCertificate": vehicle_data.get("roadworthy_certificate"),
+                "updatedAt": firestore.SERVER_TIMESTAMP
+            }
+            # Remove None values
+            update_data = {k: v for k, v in update_data.items() if v is not None}
+            
+            updated_driver = await self.repository.update_driver(driver_id, update_data)
+            return serialize_firestore_document(updated_driver) if updated_driver else {}
+        except Exception as e:
+            logger.error(f"Error updating vehicle details: {str(e)}")
+            raise ValidationError(f"Failed to update vehicle: {str(e)}")
+

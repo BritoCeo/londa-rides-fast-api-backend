@@ -38,3 +38,6 @@ black==23.11.0
 flake8==6.1.0
 mypy==1.7.0
 
+
+cloudinary==1.44.1
+python-multipart==0.0.22

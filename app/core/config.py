@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     # Nylas API (optional)
     NYLAS_API_KEY: Optional[str] = "nyk_v0_QcDKjTkTKFJ48xYkPYGOFdKa3phMIrGQ2fhw9p0RPW9C1iCOHFFUu8QVD7S6n3ID"
     
+    # Cloudinary Config
+    CLOUDINARY_URL: Optional[str] = None
+    
     # Business Constants
     DRIVER_SUBSCRIPTION_AMOUNT: float = 150.00  # NAD per month
     PARENT_SUBSCRIPTION_AMOUNT: float = 1000.00  # NAD per month
