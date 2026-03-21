@@ -13,7 +13,8 @@ from app.drivers.schemas import (
     UpdateDriverStatusRequest,
     UpdateDriverLocationRequest,
     UpdateVehicleRequest,
-    UploadDocumentRequest
+    UploadDocumentRequest,
+    RateRiderRequest
 )
 from app.core.logging import logger
 
@@ -276,3 +277,32 @@ async def upload_document_metadata(
 
 
 
+
+@router.get("/driver/{driver_id}/reviews", status_code=status.HTTP_200_OK)
+async def get_driver_reviews(
+    driver_id: str,
+    # Can be public or require auth, assuming public for riders to see driver reviews
+):
+    """Get recent reviews of a driver"""
+    result = await service.get_reviews(driver_id)
+    return success_response(
+        message="Driver reviews retrieved successfully",
+        data=result
+    )
+
+@router.post("/driver/rate-rider", status_code=status.HTTP_200_OK)
+async def rate_rider(
+    request: RateRiderRequest,
+    current_driver: Dict[str, Any] = Depends(get_current_driver)
+):
+    """Rate a rider for a completed ride"""
+    result = await service.rate_rider(
+        driver_id=current_driver["uid"],
+        ride_id=request.ride_id,
+        rating=request.rating,
+        review=request.review
+    )
+    return success_response(
+        message=result.pop("message"),
+        data=result
+    )

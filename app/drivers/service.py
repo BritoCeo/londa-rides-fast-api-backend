@@ -279,3 +279,124 @@ class DriverService:
             logger.error(f"Error fetching vetting status: {str(e)}")
             raise
 
+
+    async def get_reviews(self, driver_id: str) -> Dict[str, Any]:
+        """Get recent reviews for a driver"""
+        try:
+            # Check if driver exists
+            driver = self.repository.get_driver(driver_id)
+            if not driver:
+                raise NotFoundError(f"Driver {driver_id} not found")
+
+            # Get reviews from rides collection where driver_id matches and rating exists
+            # We would typically do this through a repository, but for expediency:
+            from app.core.firebase import get_firestore
+            db = get_firestore()
+            rides_ref = db.collection('rides').where('driverId', '==', driver_id).where('status', '==', 'completed').get()
+            
+            reviews = []
+            total_rating = 0
+            count = 0
+            
+            for ride in rides_ref:
+                data = ride.to_dict()
+                if 'driverRating' in data:
+                    rating = data['driverRating'].get('rating')
+                    if rating:
+                        reviews.append({
+                            'rideId': ride.id,
+                            'rating': rating,
+                            'review': data['driverRating'].get('review'),
+                            'createdAt': data.get('updatedAt', data.get('createdAt', '')).isoformat() if hasattr(data.get('updatedAt', data.get('createdAt', '')), 'isoformat') else str(data.get('updatedAt', '')),
+                            'userId': data.get('userId')
+                        })
+                        total_rating += rating
+                        count += 1
+            
+            average_rating = round(total_rating / count, 1) if count > 0 else 0
+
+            # Sort by createdAt descending and keep top 20
+            reviews.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+            reviews = reviews[:20]
+
+            return {
+                "driverId": driver_id,
+                "averageRating": average_rating,
+                "totalReviews": count,
+                "reviews": reviews
+            }
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching driver reviews: {str(e)}")
+            raise
+
+    async def rate_rider(self, driver_id: str, ride_id: str, rating: int, review: Optional[str] = None) -> Dict[str, Any]:
+        """Rate a rider for a completed ride"""
+        try:
+            # Verify ride
+            from app.core.firebase import get_firestore
+            from datetime import datetime
+            
+            db = get_firestore()
+            ride_ref = db.collection('rides').document(ride_id)
+            ride = ride_ref.get()
+            
+            if not ride.exists:
+                raise NotFoundError(f"Ride {ride_id} not found")
+                
+            ride_data = ride.to_dict()
+            
+            if ride_data.get('driverId') != driver_id:
+                raise ValidationError("You can only rate rides you drove")
+                
+            if ride_data.get('status') != 'completed':
+                raise ValidationError("Can only rate completed rides")
+                
+            # Check if already rated
+            if 'riderRating' in ride_data:
+                raise ValidationError("Rider has already been rated for this ride")
+                
+            # Add rating
+            now = datetime.utcnow()
+            rating_data = {
+                "rating": rating,
+                "review": review,
+                "ratedAt": now
+            }
+            
+            ride_ref.update({
+                "riderRating": rating_data,
+                "updatedAt": now
+            })
+            
+            # Also update user's overall rating stats
+            user_id = ride_data.get('userId')
+            if user_id:
+                user_ref = db.collection('users').document(user_id)
+                # In a real app we'd use a transaction
+                user_doc = user_ref.get()
+                if user_doc.exists:
+                    u_data = user_doc.to_dict()
+                    current_avg = u_data.get('rating', 5.0)
+                    current_count = u_data.get('ratingCount', 0)
+                    
+                    new_count = current_count + 1
+                    new_avg = ((current_avg * current_count) + rating) / new_count
+                    
+                    user_ref.update({
+                        'rating': round(new_avg, 2),
+                        'ratingCount': new_count
+                    })
+            
+            return {
+                "rideId": ride_id,
+                "rating": rating,
+                "message": "Rider rated successfully"
+            }
+            
+        except (NotFoundError, ValidationError):
+            raise
+        except Exception as e:
+            logger.error(f"Error rating rider: {str(e)}")
+            raise

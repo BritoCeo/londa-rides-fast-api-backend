@@ -13,6 +13,8 @@ from app.payments import router as payments_router
 from app.analytics import router as analytics_router
 from app.notifications import router as notifications_router
 from app.admin import router as admin_router
+from app.support import router as support_router
+from app.promotions import router as promotions_router
 
 api_router = APIRouter()
 
@@ -28,4 +30,6 @@ api_router.include_router(parent_subscription_router.router, tags=["parent-subsc
 api_router.include_router(payments_router.router, tags=["payments"])
 api_router.include_router(analytics_router.router, tags=["analytics"])
 api_router.include_router(notifications_router.router)
+api_router.include_router(support_router.router)
+api_router.include_router(promotions_router.router)
 

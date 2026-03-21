@@ -82,3 +82,9 @@ class UploadDocumentRequest(BaseModel):
     expiry_date: Optional[datetime] = None
     notes: Optional[str] = None
 
+
+class RateRiderRequest(BaseModel):
+    """Driver rating a rider"""
+    ride_id: str = Field(..., description="ID of the completed ride")
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    review: Optional[str] = Field(None, max_length=500, description="Optional text review")
