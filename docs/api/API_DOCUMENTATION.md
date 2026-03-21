@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://localhost:8000/api/v1
+https://londa-rides-fast-api-backend.onrender.com/api/v1
 ```
 
 ## Authentication
