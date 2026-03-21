@@ -299,3 +299,7 @@ class MapsService:
         except Exception as e:
             logger.error(f"Error getting optimized route: {str(e)}")
             return None
+
+
+# Global maps service instance
+maps_service = MapsService()

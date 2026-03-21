@@ -189,15 +189,12 @@ async def report_breakdown(
 
 @router.get("/driver/route-optimization", status_code=status.HTTP_200_OK)
 async def get_driver_route_optimization(
-    current_user: dict = Depends(get_current_user)
+    current_driver: dict = Depends(get_current_driver)
 ):
     """Get an optimized pickup/drop-off sequence based on accepted carpool rides"""
     try:
-        driver_id = current_user["uid"]
-        # Make sure user is a driver
-        if current_user.get("role") != "driver":
-            raise ConflictError("Only drivers can request route optimization")
-
+        driver_id = current_driver["uid"]
+        
         route_data = await service.get_optimized_route(driver_id)
         
         return success_response(
