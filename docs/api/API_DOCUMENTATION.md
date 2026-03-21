@@ -273,3 +273,62 @@ Notes:
 ### 3. Mark Read
 **PUT** `/api/v1/notifications/{notification_id}/read`
 - **Description:** Acknowledge notification receipt.
+
+## Support & Dispute Resolution
+
+### Create Support Ticket
+- **URL**: /api/v1/support/ticket
+- **Method**: POST
+- **Auth Required**: Yes
+- **Body**:
+  `json
+  {
+    "ride_id": "ride_id_123",
+    "issue_type": "driver_behavior",
+    "description": "The driver was very rude and drove recklessly.",
+    "role": "rider"
+  }
+  `
+
+### Get User Tickets
+- **URL**: /api/v1/support/tickets
+- **Method**: GET
+- **Auth Required**: Yes
+
+## Ratings & Reputation
+
+### Get Driver Reviews
+- **URL**: /api/v1/driver/{driver_id}/reviews
+- **Method**: GET
+- **Auth Required**: No
+
+### Rate Rider
+- **URL**: /api/v1/driver/rate-rider
+- **Method**: POST
+- **Auth Required**: Yes (Driver)
+- **Body**:
+  `json
+  {
+    "ride_id": "ride_id_123",
+    "rating": 5,
+    "review": "Great passenger"
+  }
+  `
+
+## Growth & Retention
+
+### Apply Promotion Code
+- **URL**: /api/v1/promotions/apply
+- **Method**: POST
+- **Auth Required**: Yes
+- **Body**:
+  `json
+  {
+    "code": "STUDENT2025"
+  }
+  `
+
+### Get Referral Code
+- **URL**: /api/v1/referral/code
+- **Method**: GET
+- **Auth Required**: Yes
