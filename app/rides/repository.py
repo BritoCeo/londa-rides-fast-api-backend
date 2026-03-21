@@ -424,3 +424,94 @@ class RideRepository:
             logger.error(f"Error rating ride: {str(e)}")
             raise
 
+    async def send_message(
+        self,
+        ride_id: str,
+        sender_id: str,
+        sender_type: str,
+        content: str,
+        message_type: str = "text"
+    ) -> Dict[str, Any]:
+        """Send a message within a ride"""
+        try:
+            messages_ref = self.db.collection(self.collection).document(ride_id).collection("messages")
+            doc_ref = messages_ref.document()
+            
+            now = datetime.now(timezone.utc)
+            message_data = {
+                "id": doc_ref.id,
+                "senderId": sender_id,
+                "senderType": sender_type,  # 'driver' or 'user'
+                "content": content,
+                "messageType": message_type,
+                "createdAt": now
+            }
+            
+            doc_ref.set(message_data)
+            return serialize_firestore_document(doc_ref.get())
+        except Exception as e:
+            logger.error(f"Error sending message in ride {ride_id}: {str(e)}")
+            raise
+
+    async def get_messages(self, ride_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get messages for a ride"""
+        try:
+            messages_ref = self.db.collection(self.collection).document(ride_id).collection("messages")
+            query = messages_ref.order_by("createdAt", direction=firestore.Query.ASCENDING).limit(limit)
+            
+            docs = query.stream()
+            messages = [serialize_firestore_document(doc) for doc in docs]
+            return messages
+        except Exception as e:
+            logger.error(f"Error getting messages for ride {ride_id}: {str(e)}")
+            raise
+
+    async def get_active_rides(self, user_id: str, ride_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get currently active rides for a user (accepted or started)"""
+        try:
+            rides_ref = self.db.collection(self.collection)
+            # Query for accepted rides
+            accepted_query = rides_ref.where(filter=FieldFilter("userId", "==", user_id))\
+                                      .where(filter=FieldFilter("status", "==", "accepted"))
+            # Query for started rides
+            started_query = rides_ref.where(filter=FieldFilter("userId", "==", user_id))\
+                                     .where(filter=FieldFilter("status", "==", "started"))
+            
+            docs = list(accepted_query.stream()) + list(started_query.stream())
+            rides = [serialize_firestore_document(doc) for doc in docs]
+            
+            # Sort by createdAt descending
+            rides.sort(key=lambda x: x.get("createdAt", ""), reverse=True)
+            
+            if ride_type:
+                rides = [r for r in rides if r.get("rideType") == ride_type]
+                
+            return rides
+        except Exception as e:
+            logger.error(f"Error getting active rides for user {user_id}: {str(e)}")
+            raise
+
+    async def reset_ride_for_reassignment(self, ride_id: str) -> Dict[str, Any]:
+        """Reset a ride to pending and clear assigned driver, extend expiry"""
+        try:
+            doc_ref = self.db.collection(self.collection).document(ride_id)
+            
+            now = datetime.now(timezone.utc)
+            new_expiry = now + timedelta(minutes=10)
+            
+            updates = {
+                "status": "pending",
+                "driverId": None,
+                "updatedAt": now,
+                "expiresAt": new_expiry
+            }
+            
+            doc_ref.update(updates)
+            
+            # Use 'DELETE' sentinel to actually remove driverId from firestore Document if needed, 
+            # but setting to None/null works since it's Optional in schema.
+            return await self.get_ride_by_id(ride_id)
+        except Exception as e:
+            logger.error(f"Error resetting ride {ride_id} to pending: {str(e)}")
+            raise
+

@@ -181,3 +181,50 @@ class RideService:
             logger.error(f"Error getting user rides: {str(e)}")
             raise
 
+    async def send_ride_message(
+        self, 
+        ride_id: str, 
+        sender_id: str, 
+        sender_type: str, 
+        content: str, 
+        message_type: str = "text"
+    ) -> Dict[str, Any]:
+        """Send a message and notify the other party"""
+        ride = await self.repository.get_ride_by_id(ride_id)
+        if not ride:
+            raise NotFoundError("Ride not found")
+        
+        # Validate ownership depending on sender type
+        if sender_type == "user" and ride["userId"] != sender_id:
+            raise ConflictError("Not authorized to send messages for this ride")
+        if sender_type == "driver" and ride.get("driverId") != sender_id:
+            raise ConflictError("Not authorized to send messages for this ride")
+            
+        message = await self.repository.send_message(ride_id, sender_id, sender_type, content, message_type)
+        
+        # Notify the parent (user) if the driver sent a message
+        if sender_type == "driver":
+            await notification_service.notify_driver_message(
+                user_id=ride["userId"],
+                ride_id=ride_id,
+                content=content
+            )
+            
+        return message
+
+    async def get_ride_messages(self, ride_id: str, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get messages for a ride"""
+        ride = await self.repository.get_ride_by_id(ride_id)
+        if not ride:
+            raise NotFoundError("Ride not found")
+            
+        if ride["userId"] != user_id and ride.get("driverId") != user_id:
+            raise ConflictError("Not authorized to read messages for this ride")
+            
+        return await self.repository.get_messages(ride_id, limit)
+
+    async def get_active_rides(self, user_id: str, ride_type: str = None) -> List[Dict[str, Any]]:
+        """Get currently active rides for a user (optionally filtered by type)"""
+        return await self.repository.get_active_rides(user_id, ride_type)
+
+

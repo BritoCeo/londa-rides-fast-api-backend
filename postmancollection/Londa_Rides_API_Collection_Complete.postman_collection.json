@@ -76,8 +76,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           },
           "response": []
@@ -92,8 +96,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/test",
-              "host": ["{{base_url}}"],
-              "path": ["test"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "test"
+              ]
             }
           },
           "response": []
@@ -138,8 +146,12 @@
             },
             "url": {
               "raw": "{{api_base}}/registration",
-              "host": ["{{api_base}}"],
-              "path": ["registration"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "registration"
+              ]
             }
           },
           "response": []
@@ -182,8 +194,12 @@
             },
             "url": {
               "raw": "{{api_base}}/verify-otp",
-              "host": ["{{api_base}}"],
-              "path": ["verify-otp"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "verify-otp"
+              ]
             }
           },
           "response": []
@@ -226,8 +242,12 @@
             },
             "url": {
               "raw": "{{api_base}}/login",
-              "host": ["{{api_base}}"],
-              "path": ["login"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "login"
+              ]
             }
           },
           "response": []
@@ -251,8 +271,12 @@
             },
             "url": {
               "raw": "{{api_base}}/email-otp-request",
-              "host": ["{{api_base}}"],
-              "path": ["email-otp-request"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "email-otp-request"
+              ]
             }
           },
           "response": []
@@ -276,8 +300,12 @@
             },
             "url": {
               "raw": "{{api_base}}/email-otp-verify",
-              "host": ["{{api_base}}"],
-              "path": ["email-otp-verify"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "email-otp-verify"
+              ]
             }
           },
           "response": []
@@ -298,8 +326,12 @@
             },
             "url": {
               "raw": "{{api_base}}/create-account",
-              "host": ["{{api_base}}"],
-              "path": ["create-account"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "create-account"
+              ]
             }
           },
           "response": []
@@ -334,8 +366,12 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/refresh-token",
-              "host": ["{{api_base}}"],
-              "path": ["refresh-token"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "refresh-token"
+              ]
             }
           },
           "response": []
@@ -347,8 +383,12 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/me",
-              "host": ["{{api_base}}"],
-              "path": ["me"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "me"
+              ]
             }
           },
           "response": []
@@ -369,8 +409,12 @@
             },
             "url": {
               "raw": "{{api_base}}/update-profile",
-              "host": ["{{api_base}}"],
-              "path": ["update-profile"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "update-profile"
+              ]
             }
           },
           "response": []
@@ -391,8 +435,12 @@
             },
             "url": {
               "raw": "{{api_base}}/update-location",
-              "host": ["{{api_base}}"],
-              "path": ["update-location"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "update-location"
+              ]
             }
           },
           "response": []
@@ -430,12 +478,16 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"pickup_location\": {\n    \"latitude\": -22.5700,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.5800,\n    \"longitude\": 17.0900,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"standard\",\n  \"estimated_fare\": 13.00,\n  \"passengerCount\": 1\n}"
+              "raw": "{\n  \"pickup_location\": {\n    \"latitude\": -22.5700,\n    \"longitude\": 17.0836,\n    \"name\": \"Windhoek City Center\",\n    \"address\": \"Independence Ave, Windhoek\"\n  },\n  \"dropoff_location\": {\n    \"latitude\": -22.5800,\n    \"longitude\": 17.0900,\n    \"name\": \"University of Namibia\",\n    \"address\": \"Pionierspark, Windhoek\"\n  },\n  \"ride_type\": \"school\" // or \"standard\",\n  \"estimated_fare\": 13.00,\n  \"passengerCount\": 1\n}"
             },
             "url": {
               "raw": "{{api_base}}/request-ride",
-              "host": ["{{api_base}}"],
-              "path": ["request-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "request-ride"
+              ]
             }
           },
           "response": []
@@ -447,8 +499,12 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5",
-              "host": ["{{api_base}}"],
-              "path": ["nearby-drivers"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "nearby-drivers"
+              ],
               "query": [
                 {
                   "key": "latitude",
@@ -483,8 +539,12 @@
                 ],
                 "url": {
                   "raw": "{{api_base}}/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=5",
-                  "host": ["{{api_base}}"],
-                  "path": ["nearby-drivers"],
+                  "host": [
+                    "{{api_base}}"
+                  ],
+                  "path": [
+                    "nearby-drivers"
+                  ],
                   "query": [
                     {
                       "key": "latitude",
@@ -525,8 +585,12 @@
                 ],
                 "url": {
                   "raw": "{{api_base}}/nearby-drivers?latitude=-22.5700&longitude=17.0836&radius=1",
-                  "host": ["{{api_base}}"],
-                  "path": ["nearby-drivers"],
+                  "host": [
+                    "{{api_base}}"
+                  ],
+                  "path": [
+                    "nearby-drivers"
+                  ],
                   "query": [
                     {
                       "key": "latitude",
@@ -567,8 +631,12 @@
                 ],
                 "url": {
                   "raw": "{{api_base}}/nearby-drivers?latitude=200&longitude=17.0836&radius=5",
-                  "host": ["{{api_base}}"],
-                  "path": ["nearby-drivers"],
+                  "host": [
+                    "{{api_base}}"
+                  ],
+                  "path": [
+                    "nearby-drivers"
+                  ],
                   "query": [
                     {
                       "key": "latitude",
@@ -614,8 +682,12 @@
             },
             "url": {
               "raw": "{{api_base}}/cancel-ride",
-              "host": ["{{api_base}}"],
-              "path": ["cancel-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "cancel-ride"
+              ]
             }
           },
           "response": []
@@ -636,8 +708,12 @@
             },
             "url": {
               "raw": "{{api_base}}/rate-ride",
-              "host": ["{{api_base}}"],
-              "path": ["rate-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "rate-ride"
+              ]
             }
           },
           "response": []
@@ -649,8 +725,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/ride-status/{{ride_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["ride-status", "{{ride_id}}"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "ride-status",
+                "{{ride_id}}"
+              ]
             }
           },
           "response": []
@@ -662,8 +743,12 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/get-rides?page=1&limit=10",
-              "host": ["{{api_base}}"],
-              "path": ["get-rides"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "get-rides"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -672,6 +757,56 @@
                 {
                   "key": "limit",
                   "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ride Messages (Parent)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base}}/rides/{{ride_id}}/messages?limit=50",
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "rides",
+                "{{ride_id}}",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Rides (Parent Dashboard)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{api_base}}/parent/active-rides?ride_type=school",
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "active-rides"
+              ],
+              "query": [
+                {
+                  "key": "ride_type",
+                  "value": "school",
+                  "description": "Filter by ride type (e.g., 'school' or 'standard')"
                 }
               ]
             }
@@ -718,8 +853,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/send-otp",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "send-otp"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "send-otp"
+              ]
             }
           },
           "response": []
@@ -743,8 +883,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/verify-otp",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "verify-otp"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "verify-otp"
+              ]
             }
           },
           "response": []
@@ -787,8 +932,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/login",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "login"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "login"
+              ]
             }
           },
           "response": []
@@ -809,8 +959,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/create-account",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "create-account"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "create-account"
+              ]
             }
           },
           "response": []
@@ -822,8 +977,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/me",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "me"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "me"
+              ]
             }
           },
           "response": []
@@ -844,8 +1004,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/update-status",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "update-status"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "update-status"
+              ]
             }
           },
           "response": []
@@ -866,8 +1031,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/update-location",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "update-location"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "update-location"
+              ]
             }
           },
           "response": []
@@ -884,8 +1054,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/available-rides?limit=50",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "available-rides"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "available-rides"
+              ],
               "query": [
                 {
                   "key": "limit",
@@ -912,8 +1087,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/accept-ride",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "accept-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "accept-ride"
+              ]
             }
           },
           "response": []
@@ -934,8 +1114,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/decline-ride",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "decline-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "decline-ride"
+              ]
             }
           },
           "response": []
@@ -956,8 +1141,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/start-ride",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "start-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "start-ride"
+              ]
             }
           },
           "response": []
@@ -978,8 +1168,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/complete-ride",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "complete-ride"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "complete-ride"
+              ]
             }
           },
           "response": []
@@ -991,8 +1186,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/get-rides?page=1&limit=10",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "get-rides"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "get-rides"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1002,6 +1202,61 @@
                   "key": "limit",
                   "value": "10"
                 }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Ride Message (Driver)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"content\": \"I have arrived at the school.\",\\n  \"message_type\": \"text\"\\n}"
+            },
+            "url": {
+              "raw": "{{api_base}}/rides/{{ride_id}}/messages",
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "rides",
+                "{{ride_id}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Report Breakdown (Driver)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"ride_id\": \"{{ride_id}}\"\\n}"
+            },
+            "url": {
+              "raw": "{{api_base}}/driver/report-breakdown",
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "report-breakdown"
               ]
             }
           },
@@ -1028,8 +1283,13 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription"
+              ],
               "description": "Creates a driver subscription. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
             }
           },
@@ -1042,8 +1302,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/subscription",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription"
+              ]
             }
           },
           "response": []
@@ -1055,8 +1320,14 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "{{driver_id}}"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription",
+                "{{driver_id}}"
+              ]
             }
           },
           "response": []
@@ -1077,8 +1348,14 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "{{driver_id}}"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription",
+                "{{driver_id}}"
+              ],
               "description": "Updates driver subscription settings. The driver_id in the path must match the authenticated driver's ID."
             }
           },
@@ -1100,8 +1377,14 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription/payment",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "payment"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription",
+                "payment"
+              ],
               "description": "Processes subscription payment. The driver_id is automatically extracted from the Bearer token - do NOT include it in the request body."
             }
           },
@@ -1114,8 +1397,15 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/subscription/history/{{driver_id}}?page=1&limit=10",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "history", "{{driver_id}}"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription",
+                "history",
+                "{{driver_id}}"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1146,8 +1436,14 @@
             },
             "url": {
               "raw": "{{api_base}}/driver/subscription/{{driver_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "subscription", "{{driver_id}}"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "subscription",
+                "{{driver_id}}"
+              ],
               "description": "Cancels driver subscription. The driver_id in the path must match the authenticated driver's ID. The reason field is optional in the request body."
             }
           },
@@ -1174,8 +1470,13 @@
             },
             "url": {
               "raw": "{{api_base}}/parent/subscribe",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "subscribe"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "subscribe"
+              ]
             }
           },
           "response": []
@@ -1187,8 +1488,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/parent/subscription?user_id={{user_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "subscription"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "subscription"
+              ],
               "query": [
                 {
                   "key": "user_id",
@@ -1215,8 +1521,13 @@
             },
             "url": {
               "raw": "{{api_base}}/parent/subscription",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "subscription"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "subscription"
+              ]
             }
           },
           "response": []
@@ -1237,8 +1548,13 @@
             },
             "url": {
               "raw": "{{api_base}}/parent/subscription",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "subscription"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "subscription"
+              ]
             }
           },
           "response": []
@@ -1250,8 +1566,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/parent/usage?user_id={{user_id}}&month=12&year=2024",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "usage"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "usage"
+              ],
               "query": [
                 {
                   "key": "user_id",
@@ -1277,8 +1598,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/parent/children?user_id={{user_id}}",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "children"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "children"
+              ],
               "query": [
                 {
                   "key": "user_id",
@@ -1305,8 +1631,13 @@
             },
             "url": {
               "raw": "{{api_base}}/parent/children",
-              "host": ["{{api_base}}"],
-              "path": ["parent", "children"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "parent",
+                "children"
+              ]
             }
           },
           "response": []
@@ -1332,8 +1663,13 @@
             },
             "url": {
               "raw": "{{api_base}}/payment/calculate-fare",
-              "host": ["{{api_base}}"],
-              "path": ["payment", "calculate-fare"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "payment",
+                "calculate-fare"
+              ]
             }
           },
           "response": []
@@ -1354,8 +1690,13 @@
             },
             "url": {
               "raw": "{{api_base}}/payment/process",
-              "host": ["{{api_base}}"],
-              "path": ["payment", "process"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "payment",
+                "process"
+              ]
             }
           },
           "response": []
@@ -1367,8 +1708,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/payment/history?page=1&limit=10",
-              "host": ["{{api_base}}"],
-              "path": ["payment", "history"],
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "payment",
+                "history"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1399,8 +1745,12 @@
             },
             "url": {
               "raw": "{{api_base}}/subscribe-monthly",
-              "host": ["{{api_base}}"],
-              "path": ["subscribe-monthly"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "subscribe-monthly"
+              ]
             }
           },
           "response": []
@@ -1417,8 +1767,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/analytics/rides",
-              "host": ["{{api_base}}"],
-              "path": ["analytics", "rides"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "analytics",
+                "rides"
+              ]
             }
           },
           "response": []
@@ -1430,8 +1785,13 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/analytics/performance",
-              "host": ["{{api_base}}"],
-              "path": ["analytics", "performance"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "analytics",
+                "performance"
+              ]
             }
           },
           "response": []
@@ -1443,8 +1803,14 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/analytics/earnings",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "analytics", "earnings"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "analytics",
+                "earnings"
+              ]
             }
           },
           "response": [
@@ -1461,8 +1827,14 @@
                 ],
                 "url": {
                   "raw": "{{api_base}}/driver/analytics/earnings",
-                  "host": ["{{api_base}}"],
-                  "path": ["driver", "analytics", "earnings"]
+                  "host": [
+                    "{{api_base}}"
+                  ],
+                  "path": [
+                    "driver",
+                    "analytics",
+                    "earnings"
+                  ]
                 }
               },
               "status": "OK",
@@ -1485,8 +1857,14 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/analytics/rides",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "analytics", "rides"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "analytics",
+                "rides"
+              ]
             }
           },
           "response": []
@@ -1498,8 +1876,14 @@
             "header": [],
             "url": {
               "raw": "{{api_base}}/driver/analytics/performance",
-              "host": ["{{api_base}}"],
-              "path": ["driver", "analytics", "performance"]
+              "host": [
+                "{{api_base}}"
+              ],
+              "path": [
+                "driver",
+                "analytics",
+                "performance"
+              ]
             }
           },
           "response": []
@@ -1508,4 +1892,3 @@
     }
   ]
 }
-

@@ -128,6 +128,47 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Error sending ride cancelled notification: {str(e)}")
 
+    async def notify_driver_message(
+        self,
+        user_id: str,
+        ride_id: str,
+        content: str
+    ) -> None:
+        """Notify parent that driver sent a message"""
+        try:
+            title = "Message from your driver"
+            # Truncate content to 100 chars
+            truncated_content = content[:100] + "..." if len(content) > 100 else content
+            body = truncated_content
+            
+            data = {
+                "type": "ride_message",
+                "rideId": ride_id
+            }
+            
+            await self.fcm.send_notification(user_id, title, body, data)
+        except Exception as e:
+            logger.error(f"Error sending driver message notification: {str(e)}")
+
+    async def notify_breakdown(
+        self,
+        user_id: str,
+        ride_id: str
+    ) -> None:
+        """Notify parent that driver reported a breakdown and new driver is requested"""
+        try:
+            title = "Driver Breakdown"
+            body = "Your driver reported a breakdown. Finding a replacement driver nearby..."
+            
+            data = {
+                "type": "ride_breakdown",
+                "rideId": ride_id
+            }
+            
+            await self.fcm.send_notification(user_id, title, body, data)
+        except Exception as e:
+            logger.error(f"Error sending breakdown notification: {str(e)}")
+
 
 # Global notification service instance
 notification_service = NotificationService()

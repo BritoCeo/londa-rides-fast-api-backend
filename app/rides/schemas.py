@@ -22,7 +22,7 @@ class RequestRideRequest(BaseModel):
     """
     pickup_location: Location
     dropoff_location: Location
-    ride_type: str = "standard"
+    ride_type: Literal["standard", "school"] = "standard"
     estimated_fare: float = Field(13.00, description="Estimated fare in NAD")
     passengerCount: int = Field(1, ge=1, le=8)
 
@@ -85,4 +85,25 @@ class RideResponse(BaseModel):
     createdAt: datetime
     updatedAt: datetime
     expiresAt: Optional[datetime] = None
+
+
+class RideMessageRequest(BaseModel):
+    """Request to send a message in a ride"""
+    content: str = Field(..., min_length=1)
+    message_type: Literal["text", "status_update"] = "text"
+
+
+class RideMessageResponse(BaseModel):
+    """Message returned from the API"""
+    id: str
+    senderId: str
+    senderType: Literal["driver", "user"]
+    content: str
+    messageType: str
+    createdAt: datetime
+
+
+class ReportBreakdownRequest(BaseModel):
+    """Driver reports a breakdown"""
+    ride_id: str
 

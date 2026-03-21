@@ -1,6 +1,7 @@
 """
 Ride Router - User Endpoints
 """
+from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
 from app.core.responses import success_response
 from app.core.security import get_current_user
@@ -217,4 +218,44 @@ async def get_nearby_drivers(
         )
         # Re-raise to be handled by global exception handler
         raise
+
+
+@router.get("/rides/{ride_id}/messages", status_code=status.HTTP_200_OK)
+async def get_ride_messages(
+    ride_id: str,
+    limit: int = Query(50, ge=1, le=100),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all messages for a specific ride"""
+    try:
+        user_id = current_user["uid"]
+        messages = await service.get_ride_messages(ride_id, user_id, limit)
+        
+        return success_response(
+            message="Messages retrieved successfully",
+            data={"messages": messages, "count": len(messages)}
+        )
+    except Exception as e:
+        logger.error(f"Get ride messages error: {str(e)}")
+        raise
+
+
+@router.get("/parent/active-rides", status_code=status.HTTP_200_OK)
+async def get_parent_active_rides(
+    ride_type: Optional[str] = Query(None, description="Filter by ride type (e.g., 'school')"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all active rides for the logged in parent"""
+    try:
+        user_id = current_user["uid"]
+        rides = await service.get_active_rides(user_id, ride_type)
+        
+        return success_response(
+            message="Active rides retrieved successfully",
+            data={"rides": rides, "count": len(rides)}
+        )
+    except Exception as e:
+        logger.error(f"Get parent active rides error: {str(e)}")
+        raise
+
 

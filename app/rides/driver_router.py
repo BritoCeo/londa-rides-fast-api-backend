@@ -5,11 +5,20 @@ from fastapi import APIRouter, Depends, Query, status
 from app.core.responses import success_response
 from app.core.security import get_current_driver
 from app.rides.driver_service import DriverRideService
-from app.rides.schemas import AcceptRideRequest, DeclineRideRequest, StartRideRequest, CompleteRideRequest
+from app.rides.service import RideService
+from app.rides.schemas import (
+    AcceptRideRequest, 
+    DeclineRideRequest, 
+    StartRideRequest, 
+    CompleteRideRequest,
+    RideMessageRequest,
+    ReportBreakdownRequest
+)
 from app.core.logging import logger
 
 router = APIRouter()
 service = DriverRideService()
+ride_service_instance = RideService()
 
 
 @router.get("/driver/available-rides", status_code=status.HTTP_200_OK)
@@ -128,5 +137,53 @@ async def get_driver_rides(
         
     except Exception as e:
         logger.error(f"Get driver rides error: {str(e)}")
+        raise
+
+
+@router.post("/rides/{ride_id}/messages", status_code=status.HTTP_201_CREATED)
+async def driver_send_message(
+    ride_id: str,
+    request: RideMessageRequest,
+    current_driver: dict = Depends(get_current_driver)
+):
+    """Driver sends a message during a ride"""
+    try:
+        driver_id = current_driver["uid"]
+        message = await ride_service_instance.send_ride_message(
+            ride_id=ride_id,
+            sender_id=driver_id,
+            sender_type="driver",
+            content=request.content,
+            message_type=request.message_type
+        )
+        
+        return success_response(
+            message="Message sent successfully",
+            data=message
+        )
+        
+    except Exception as e:
+        logger.error(f"Driver send message error: {str(e)}")
+        raise
+
+
+@router.post("/driver/report-breakdown", status_code=status.HTTP_200_OK)
+async def report_breakdown(
+    request: ReportBreakdownRequest,
+    current_driver: dict = Depends(get_current_driver)
+):
+    """Driver reports a breakdown, resets ride to pending and notifies replacement drivers"""
+    try:
+        driver_id = current_driver["uid"]
+        # Call the breakdown report logic
+        updated_ride = await service.report_breakdown(driver_id, request.ride_id)
+        
+        return success_response(
+            message="Breakdown reported successfully",
+            data=updated_ride
+        )
+        
+    except Exception as e:
+        logger.error(f"Report breakdown error: {str(e)}")
         raise
 
