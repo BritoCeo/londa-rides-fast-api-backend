@@ -2958,3 +2958,90 @@ For API support or questions:
 **Document Version:** 2.0.0  
 **Last Updated:** January 2025  
 **Maintained by:** Londa Rides Development Team
+
+## 13. Safety & Security APIs
+
+### 13.1 Trigger SOS Alert
+* **Endpoint**: `POST /ride/{ride_id}/sos`
+* **Description**: Trigger an emergency alert for an active ride.
+* **Authentication**: Required (User or Driver)
+* **Request Body**:
+  ```json
+  {
+    "location": {
+      "latitude": -22.56,
+      "longitude": 17.06
+    },
+    "reason": "Feeling unsafe"
+  }
+  ```
+
+### 13.2 Share Track Link
+* **Endpoint**: `POST /ride/{ride_id}/share-tracking`
+* **Description**: Generate a shareable tracking link to monitor ride progress.
+* **Authentication**: Required (User only)
+* **Request Body**:
+  ```json
+  {
+    "duration_minutes": 60
+  }
+  ```
+
+## 14. Advanced Carpooling & Routing
+
+### 14.1 Update Ride Stops
+* **Endpoint**: `PUT /ride/{ride_id}/stops`
+* **Description**: Add or update intermediate stops for a ride.
+* **Authentication**: Required (User only)
+* **Request Body**:
+  ```json
+  {
+    "stops": [
+      {
+         "latitude": -22.57,
+         "longitude": 17.07,
+         "address": "Intermediate Stop Address"
+      }
+    ]
+  }
+  ```
+
+### 14.2 Driver Route Optimization
+* **Endpoint**: `GET /driver/route-optimization`
+* **Description**: Get an optimized pickup/drop-off sequence based on accepted carpool rides and stops.
+* **Authentication**: Required (Driver only)
+
+## 15. Driver Vehicle & Documents
+
+### 15.1 Get Vehicle Details
+* **Endpoint**: `GET /driver/vehicle`
+* **Description**: Get current driver's vehicle information.
+* **Authentication**: Required (Driver only)
+
+### 15.2 Update Vehicle Details
+* **Endpoint**: `PUT /driver/vehicle`
+* **Description**: Update current driver's vehicle information.
+* **Authentication**: Required (Driver only)
+* **Request Body**:
+  ```json
+  {
+    "make": "Toyota",
+    "model": "Corolla",
+    "year": 2020,
+    "color": "White",
+    "licensePlate": "N 12345 W",
+    "capacity": 4
+  }
+  ```
+
+### 15.3 Upload Document Metadata
+* **Endpoint**: `POST /driver/documents/metadata`
+* **Description**: Upload metadata (like Cloudinary URL) for a driver document.
+* **Authentication**: Required (Driver only)
+* **Request Body**:
+  ```json
+  {
+    "document_type": "driver_license",
+    "document_url": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+  }
+  ```
