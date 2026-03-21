@@ -180,6 +180,52 @@ class ParentSubscriptionRepository:
         except Exception as e:
             logger.error(f"Error adding child profile: {str(e)}")
             raise
+            
+    async def update_child_profile(
+        self,
+        child_id: str,
+        user_id: str,
+        update_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Update a child profile"""
+        try:
+            child_ref = self.db.collection(self.children_collection).document(child_id)
+            doc = child_ref.get()
+            
+            if not doc.exists or doc.to_dict().get("userId") != user_id:
+                raise Exception("Child profile not found or unauthorized")
+                
+            update_data["updatedAt"] = firestore.SERVER_TIMESTAMP
+            child_ref.update(update_data)
+            
+            # Note: The embedded child inside parent subscription should ideally be updated as well
+            # if we are denormalizing the data, but for simplicity we rely on the main collection.
+            doc = child_ref.get()
+            return serialize_firestore_document(doc.to_dict()) if doc.exists else {}
+
+        except Exception as e:
+            logger.error(f"Error updating child profile: {str(e)}")
+            raise
+            
+    async def delete_child_profile(
+        self,
+        child_id: str,
+        user_id: str
+    ) -> bool:
+        """Delete a child profile"""
+        try:
+            child_ref = self.db.collection(self.children_collection).document(child_id)
+            doc = child_ref.get()
+            
+            if not doc.exists or doc.to_dict().get("userId") != user_id:
+                raise Exception("Child profile not found or unauthorized")
+                
+            child_ref.delete()
+            return True
+
+        except Exception as e:
+            logger.error(f"Error deleting child profile: {str(e)}")
+            raise
     
     async def get_usage_stats(
         self,

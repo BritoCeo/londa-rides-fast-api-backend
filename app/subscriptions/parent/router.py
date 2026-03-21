@@ -2,6 +2,7 @@
 Parent Subscription Router
 """
 from fastapi import APIRouter, Depends, Query, status
+from typing import Dict, Any
 from app.core.responses import success_response
 from app.core.security import get_current_user
 from app.subscriptions.parent.service import ParentSubscriptionService
@@ -176,5 +177,43 @@ async def add_child_profile(
         
     except Exception as e:
         logger.error(f"Add child profile error: {str(e)}")
+        raise
+
+@router.put("/parent/children/{child_id}", status_code=status.HTTP_200_OK)
+async def update_child_profile(
+    child_id: str,
+    update_data: Dict[str, Any],
+    current_user: dict = Depends(get_current_user)
+):
+    """Update a child's profile (e.g. adding emergency contact)"""
+    try:
+        user_id = current_user["uid"]
+        updated_child = await service.update_child_profile(child_id, update_data, user_id)
+        
+        return success_response(
+            message="Child profile updated successfully",
+            data=updated_child
+        )
+        
+    except Exception as e:
+        logger.error(f"Update child profile error: {str(e)}")
+        raise
+
+@router.delete("/parent/children/{child_id}", status_code=status.HTTP_200_OK)
+async def delete_child_profile(
+    child_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Remove a child profile as they graduate or leave."""
+    try:
+        user_id = current_user["uid"]
+        success = await service.delete_child_profile(child_id, user_id)
+        
+        return success_response(
+            message="Child profile removed successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Delete child profile error: {str(e)}")
         raise
 

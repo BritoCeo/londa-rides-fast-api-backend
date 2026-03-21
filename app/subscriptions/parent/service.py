@@ -175,4 +175,20 @@ class ParentSubscriptionService:
         except Exception as e:
             logger.error(f"Error adding child profile: {str(e)}")
             raise
+            
+    async def update_child_profile(self, child_id: str, request_data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
+        """Update a child profile"""
+        try:
+            return await self.repository.update_child_profile(child_id, user_id, request_data)
+        except Exception as e:
+            logger.error(f"Error updating child profile: {str(e)}")
+            raise
+            
+    async def delete_child_profile(self, child_id: str, user_id: str) -> bool:
+        """Delete a child profile"""
+        try:
+            return await self.repository.delete_child_profile(child_id, user_id)
+        except Exception as e:
+            logger.error(f"Error deleting child profile: {str(e)}")
+            raise
 
